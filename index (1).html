@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>중3 동아(윤정미) 단어 Quiz</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --acc:#1A3A5C;--acc2:#2C5282;--grn:#1E6B3C;--grn-l:#E3F5EB;
+  --red:#8B0000;--red-l:#FDEDEC;--bg:#F5F2EB;--sf:#FEFCF7;--sf2:#EEEBE3;
+  --ink:#1A1814;--ink2:#6B6760;--ink3:#A8A49E;
+  --bd:rgba(26,24,20,.13);--bds:rgba(26,24,20,.26);--r:10px;--rl:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+.nav{background:var(--acc);color:#fff;padding:0 .75rem;display:flex;align-items:center;position:sticky;top:0;z-index:100;box-shadow:0 2px 6px rgba(0,0,0,.25);}
+.nav-title{font-size:13px;font-weight:700;margin-right:auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px;}
+.nav-tab{padding:13px 14px;font-size:13px;font-weight:600;cursor:pointer;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.6);background:none;font-family:inherit;white-space:nowrap;transition:all .15s;}
+.nav-tab.active{color:#fff;border-bottom-color:#fff;}
+.nav-tab:hover{color:#fff;}
+.panel{display:none;padding:1rem 1rem 3rem;max-width:760px;margin:0 auto;}
+.panel.active{display:block;}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1.2rem;margin-bottom:1rem;}
+.ct{font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.6px;margin-bottom:.85rem;}
+.qgrid{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:.6rem;}
+.qbtn{padding:5px 11px;border:1.5px solid var(--bds);border-radius:20px;background:var(--sf);color:var(--ink2);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;user-select:none;font-family:inherit;}
+.qbtn:hover{background:var(--sf2);}
+.qbtn.on{background:var(--acc);color:#fff;border-color:var(--acc);}
+.lbtn{background:none;border:none;color:var(--acc);font-size:12px;cursor:pointer;text-decoration:underline;padding:0;font-family:inherit;}
+.ctr{font-size:12px;color:var(--ink2);margin-top:.4rem;}
+.ctr strong{color:var(--acc);}
+.opt-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:.55rem;}
+.ck{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink2);cursor:pointer;}
+.ck input{width:15px;height:15px;accent-color:var(--acc);}
+.ck small{color:var(--ink3);font-size:11px;}
+input[type=text]{padding:7px 11px;border:1px solid var(--bds);border-radius:var(--r);font-size:13px;background:var(--sf);color:var(--ink);font-family:inherit;outline:none;}
+input[type=text]:focus{border-color:var(--acc);}
+.btn{padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .15s;}
+.btn-p{background:var(--acc);color:#fff;}
+.btn-p:hover{background:#0f2640;}
+.btn-s{background:var(--sf2);color:var(--ink);border:1px solid var(--bds);}
+.btn-s:hover{background:#ddd9d0;}
+.btn-g{background:var(--grn);color:#fff;}
+.btn-g:hover{background:#155230;}
+.brow{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:.75rem;}
+.st{font-size:12px;padding:8px 12px;border-radius:var(--r);margin-top:.65rem;display:none;}
+.ok{background:var(--grn-l);color:var(--grn);border:1px solid #a8dbb8;}
+.er{background:var(--red-l);color:var(--red);border:1px solid #f5c0c0;}
+/* Mode cards */
+.mc{border:2px solid var(--bds);border-radius:var(--rl);padding:1rem;cursor:pointer;transition:all .15s;margin-bottom:.65rem;}
+.mc:hover{border-color:var(--acc);}
+.mc.sel{border-color:var(--acc);background:#E3EEF7;}
+.mc-t{font-size:13px;font-weight:700;color:var(--ink);}
+.mc-d{font-size:12px;color:var(--ink2);margin-top:2px;}
+/* Live score */
+.lscore{display:flex;gap:12px;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:.6rem 1rem;margin-bottom:1rem;flex-wrap:wrap;}
+.ls{font-size:11px;color:var(--ink2);}
+.ls span{font-size:15px;font-weight:700;color:var(--ink);display:block;}
+/* Progress */
+.prog-t{height:4px;background:var(--sf2);border-radius:2px;margin-bottom:1.2rem;}
+.prog-f{height:4px;background:var(--acc);border-radius:2px;transition:width .3s;}
+/* Q card */
+.qcard{background:var(--sf);border:1px solid var(--bd);border-radius:var(--rl);padding:1.2rem;margin-bottom:.85rem;}
+.qmeta{display:flex;gap:5px;margin-bottom:.55rem;flex-wrap:wrap;align-items:center;}
+.qnum{font-size:11px;color:var(--ink3);}
+.badge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:700;}
+.bQ18,.bQ19{background:#FFF8F0;color:#E65100;}
+.bQ20,.bQ21{background:#EAFAF1;color:#1B5E20;}
+.bQ22,.bQ23,.bQ24{background:#EBF5FB;color:#0D47A1;}
+.bQ26{background:#FDEDEC;color:#880E4F;}
+.bQ29,.bQ30{background:#F5EEF8;color:#4A148C;}
+.bQ31,.bQ32,.bQ33,.bQ34,.bQ35{background:#E8F8F5;color:#004D40;}
+.bQ36,.bQ37,.bQ38,.bQ39,.bQ40{background:#FEFDE7;color:#827717;}
+.bQ4142,.bQ4345{background:#F0EBFF;color:#311B92;}
+.tbadge{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:700;background:#E3EEF7;color:var(--acc);}
+.qprompt{font-size:15px;font-weight:600;color:var(--ink);margin-bottom:.4rem;line-height:1.5;}
+.qhint{font-size:12px;color:var(--ink2);margin-bottom:.85rem;line-height:1.5;font-style:italic;}
+.opts{display:grid;gap:7px;}
+.obtn{text-align:left;background:var(--sf2);border:1.5px solid var(--bds);border-radius:var(--r);padding:9px 13px;font-size:13px;color:var(--ink);cursor:pointer;transition:all .15s;font-family:inherit;line-height:1.4;}
+.obtn:hover:not(:disabled){background:#ddd9d0;border-color:var(--acc);}
+.obtn.correct{background:var(--grn-l);border-color:var(--grn);color:var(--grn);font-weight:600;}
+.obtn.wrong{background:var(--red-l);border-color:var(--red);color:var(--red);}
+.obtn.reveal{background:var(--grn-l);border-color:var(--grn);color:var(--grn);}
+.frow{display:flex;gap:7px;flex-wrap:wrap;align-items:center;}
+.finp{flex:1;min-width:160px;padding:9px 12px;border:1.5px solid var(--bds);border-radius:var(--r);font-size:14px;font-family:inherit;background:var(--sf);color:var(--ink);outline:none;}
+.finp:focus{border-color:var(--acc);}
+.finp.correct{border-color:var(--grn);background:var(--grn-l);color:var(--grn);}
+.finp.wrong{border-color:var(--red);background:var(--red-l);color:var(--red);}
+.expl{font-size:12px;color:var(--ink2);margin-top:.65rem;padding:7px 11px;background:var(--sf2);border-radius:var(--r);border-left:3px solid var(--acc);display:none;line-height:1.6;}
+.eng-def{font-size:11px;color:var(--acc);background:#E3EEF7;border-radius:6px;padding:3px 9px;display:inline-block;margin-bottom:.5rem;font-style:italic;}
+/* Score */
+.score-emoji{font-size:2.8rem;text-align:center;margin:.75rem 0 .25rem;}
+.score-big{font-size:3rem;font-weight:700;color:var(--acc);text-align:center;}
+.score-sub{font-size:13px;color:var(--ink2);text-align:center;margin-bottom:1.25rem;}
+.sgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;margin-bottom:1.25rem;}
+.sbox{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:.8rem;text-align:center;}
+.sbox .v{font-size:1.5rem;font-weight:700;color:var(--ink);}
+.sbox .l{font-size:11px;color:var(--ink2);margin-top:2px;}
+.ritem{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:.85rem;margin-bottom:.5rem;border-left:3px solid var(--red);}
+.rword{font-size:13px;font-weight:700;}
+.rans{font-size:12px;margin-top:3px;line-height:1.55;}
+@media(max-width:480px){
+  .nav-title{font-size:12px;}
+  .nav-tab{padding:12px 10px;font-size:11px;}
+  .qprompt{font-size:14px;}
+  .obtn{font-size:13px;}
+}
+
+/* ── SCRAMBLE ── */
+.scr-sentence{margin-bottom:1rem;}
+.scr-label{font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.5rem;}
+.scr-zone{min-height:52px;border:2px dashed var(--bds);border-radius:var(--r);padding:8px;display:flex;flex-wrap:wrap;gap:6px;background:var(--sf);transition:border-color .2s;align-content:flex-start;}
+.scr-zone.correct-zone{border-color:var(--grn);background:var(--grn-l);}
+.scr-zone.wrong-zone{border-color:var(--red);background:var(--red-l);}
+.word-chip{padding:7px 13px;background:#fff;border:1.5px solid var(--bds);border-radius:20px;font-size:13px;color:var(--ink);cursor:pointer;user-select:none;transition:all .15s;font-family:inherit;line-height:1;}
+.word-chip:hover:not(:disabled){border-color:var(--acc);background:#E3EEF7;transform:translateY(-1px);}
+.word-chip.correct-chip{background:var(--grn-l);border-color:var(--grn);color:var(--grn);cursor:default;}
+.word-chip.wrong-chip{background:var(--red-l);border-color:var(--red);color:var(--red);}
+.scr-feedback{font-size:13px;margin-top:8px;font-weight:600;min-height:20px;}
+.scr-feedback.ok{color:var(--grn);}
+.scr-feedback.ng{color:var(--red);}
+.scr-key{font-size:12px;color:var(--ink2);font-style:italic;margin-top:5px;padding:6px 10px;background:var(--grn-l);border-radius:var(--r);border-left:3px solid var(--grn);}
+.scr-word-label{font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px;}
+.scr-word-ko{font-size:12px;margin-bottom:.75rem;line-height:1.6;}
+
+/* ── CATEGORY CARDS ── */
+.cat-card{border:2px solid var(--bds);border-radius:var(--rl);overflow:hidden;cursor:pointer;transition:border-color .2s;}
+.cat-card:hover{border-color:var(--acc);}
+.cat-card.cat-active{border-color:var(--acc);}
+.cat-header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1rem;background:var(--sf2);gap:10px;}
+.cat-title{font-size:14px;font-weight:700;color:var(--ink);}
+.cat-desc{font-size:12px;color:var(--ink2);margin-top:2px;}
+.cat-arrow{font-size:13px;color:var(--acc);font-weight:700;flex-shrink:0;transition:transform .2s;}
+.cat-body{padding:.75rem .75rem .25rem;}
+.cat-body .mc{margin-bottom:.5rem;}
+.cat-body .mc:last-child{margin-bottom:.25rem;}
+
+/* ── DIFFICULTY STARS ── */
+.stars{font-size:11px;margin-left:5px;vertical-align:middle;letter-spacing:1px;}
+
+
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <div class="nav-title">📚 중3 동아(윤정미) 단어 Quiz</div>
+  <button class="nav-tab active" id="tab-btn-teacher">🖥 Teacher</button>
+  <button class="nav-tab" id="tab-btn-student">📱 Student</button>
+</div>
+
+<!-- TEACHER -->
+<div class="panel active" id="panel-teacher">
+  <div class="card">
+    <div class="ct">Step 1 — Select questions</div>
+    <div class="qgrid" id="tq-grid"></div>
+    <div style="display:flex;gap:10px;margin-bottom:.5rem;">
+      <button class="lbtn" id="tq-all">Select all</button>
+      <button class="lbtn" id="tq-clr">Clear all</button>
+    </div>
+    <div class="ctr" id="tq-ctr">0 words selected</div>
+  </div>
+  <div class="card">
+    <div class="ct">Step 2 — Format</div>
+    <div class="opt-row">
+      <label class="ck"><input type="checkbox" id="t-ko" checked><span>Korean meaning <small>(Eng→Kor)</small></span></label>
+      <label class="ck"><input type="checkbox" id="t-en" checked><span>English word <small>(Kor→Eng)</small></span></label>
+    </div>
+    <div class="opt-row">
+      <label class="ck"><input type="checkbox" id="t-fi" checked><span>Fill-in-the-blank</span></label>
+      <label class="ck"><input type="checkbox" id="t-po" checked><span>Part of speech</span></label>
+    </div>
+    <div class="opt-row" style="margin-top:.4rem;">
+      <label class="ck"><input type="checkbox" id="t-sh" checked><span>Shuffle</span></label>
+      <label class="ck"><input type="checkbox" id="t-ky" checked><span>Answer key sheet</span></label>
+    </div>
+    <div style="margin-top:.65rem;font-size:13px;color:var(--ink2);">
+      Class: <input type="text" id="t-cls" placeholder="e.g. 2학년 1반" style="width:150px;margin-left:6px;">
+    </div>
+  </div>
+  <div class="card">
+    <div class="ct">Step 3 — Generate</div>
+    <div class="brow">
+      <button class="btn btn-s" id="t-prev-btn">Preview</button>
+      <button class="btn btn-p" id="t-gen-btn">⬇ Download Excel quiz</button>
+    </div>
+    <div class="st" id="t-status"></div>
+    <div id="t-preview" style="overflow-x:auto;margin-top:.5rem;font-size:12px;"></div>
+  </div>
+</div>
+
+<!-- STUDENT -->
+<div class="panel" id="panel-student">
+  <div id="s-setup">
+    <div class="card">
+      <div class="ct">Select questions</div>
+      <div class="qgrid" id="sq-grid"></div>
+      <div style="display:flex;gap:10px;margin-bottom:.5rem;">
+        <button class="lbtn" id="sq-all">Select all</button>
+        <button class="lbtn" id="sq-clr">Clear all</button>
+      </div>
+      <div class="ctr" id="sq-ctr">0 words selected</div>
+    </div>
+    <div class="card">
+      <div class="ct">Quiz type : <span style="font-size:11px;color:#000000;font-weight:400;font-style:italic;text-transform:none;letter-spacing:0;">👆 Choose what you are going to study!</span></div>
+
+      <!-- Category 1 -->
+      <div class="cat-card" id="cat-vocab" onclick="toggleCat('vocab')">
+        <div class="cat-header">
+          <div>
+            <div class="cat-title">📚 Let's Study Vocabulary!</div>
+            <div class="cat-desc">Word meaning, spelling &amp; definition quizzes</div>
+          </div>
+          <div class="cat-arrow" id="arrow-vocab">▼</div>
+        </div>
+        <div class="cat-body" id="body-vocab" style="display:none;">
+          <div class="mc sel" id="mode-mc"><div class="mc-t">Multiple choice 객관식 <span class="stars">⭐⭐</span></div><div class="mc-d">4 options — pick the correct Korean meaning</div></div>
+          <div class="mc" id="mode-w1"><div class="mc-t">✍️ Type 1 — Korean → English <span class="stars">⭐⭐⭐</span></div><div class="mc-d">See Korean meaning → type the English word</div></div>
+          <div class="mc" id="mode-w2"><div class="mc-t">✍️ Type 2 — Definition → English <span class="stars">⭐⭐⭐</span></div><div class="mc-d">See English definition → type the English word</div></div>
+
+        </div>
+      </div>
+
+      <!-- Category 2 -->
+      <div class="cat-card" id="cat-sent" onclick="toggleCat('sent')" style="margin-top:.6rem;">
+        <div class="cat-header">
+          <div>
+            <div class="cat-title">📝 Let's Study Sentences!</div>
+            <div class="cat-desc">Fill in blanks &amp; rebuild example sentences</div>
+          </div>
+          <div class="cat-arrow" id="arrow-sent">▶</div>
+        </div>
+        <div class="cat-body" id="body-sent" style="display:none;">
+          <div class="mc" id="mode-fi2"><div class="mc-t">✏️ Fill in the blank + 🇰🇷 <span class="stars">⭐⭐</span></div><div class="mc-d">Korean translation shown as scaffold</div></div>
+          <div class="mc" id="mode-fi"><div class="mc-t">✏️ Fill in the blank <span class="stars">⭐⭐⭐</span></div><div class="mc-d">Type the missing word — no Korean hint</div></div>
+          <div class="mc" id="mode-scr"><div class="mc-t">🔀 Sentence Scramble <span class="stars">⭐⭐⭐⭐⭐</span></div><div class="mc-d">Click words to rebuild the example sentence in order</div></div>
+          <div class="mc" id="mode-scr2"><div class="mc-t">🌈 Medium Scramble <span class="stars">⭐⭐</span></div><div class="mc-d">Words colour-coded by part of speech as a hint</div></div>
+          <div class="mc" id="mode-scr3"><div class="mc-t">🧩 Easy Scramble — Chunks <span class="stars">⭐</span></div><div class="mc-d">Arrange meaningful phrase chunks in the right order</div></div>
+        </div>
+      </div>
+
+    </div>
+    <div class="card">
+      <div class="ct">Options</div>
+      <div class="opt-row">
+        <label class="ck"><input type="checkbox" id="s-sh" checked><span>Shuffle questions</span></label>
+        <label class="ck"><input type="checkbox" id="s-rv"><span>Show explanation after each answer</span></label>
+      </div>
+      <div style="margin-top:.6rem;font-size:13px;color:var(--ink2);">
+        Name: <input type="text" id="s-name" placeholder="이름 (선택사항)" style="width:150px;margin-left:6px;">
+      </div>
+    </div>
+    <button class="btn btn-g" id="s-start" style="width:100%;padding:13px;font-size:15px;">Start Quiz →</button>
+    <div class="st" id="s-status"></div>
+  </div>
+
+  <div id="s-quiz" style="display:none;">
+    <div class="lscore">
+      <div class="ls"><span id="ls-c">0</span>Correct ✓</div>
+      <div class="ls"><span id="ls-w">0</span>Wrong ✗</div>
+      <div class="ls"><span id="ls-r">—</span>Left</div>
+      <div class="ls"><span id="ls-p">—</span>Score</div>
+    </div>
+    <div class="prog-t"><div class="prog-f" id="prog" style="width:0%"></div></div>
+    <div id="q-container"></div>
+    <div class="brow" style="margin-top:1rem;">
+      <button class="btn btn-s" id="s-reveal">Reveal all</button>
+      <button class="btn btn-p" id="s-results">See results →</button>
+    </div>
+  </div>
+
+  <div id="s-score" style="display:none;">
+    <div class="card">
+      <div style="text-align:right;margin-bottom:.25rem;">
+        <span id="sc-tasktype" style="font-size:11px;font-weight:700;padding:3px 10px;border-radius:12px;background:#E3EEF7;color:#1A3A5C;letter-spacing:.3px;"></span>
+      </div>
+      <div class="score-emoji" id="sc-emoji"></div>
+      <div class="score-big" id="sc-pct"></div>
+      <div class="score-sub" id="sc-sub"></div>
+      <div id="sc-datetime" style="text-align:center;font-size:14px;color:#000000;margin-top:6px;font-family:monospace;font-weight:700;letter-spacing:.3px;"></div>
+      <div id="sc-encourage" style="text-align:center;font-size:14px;font-weight:600;margin-top:10px;padding:10px 16px;border-radius:10px;"></div>
+    </div>
+    <div class="sgrid" id="sc-grid"></div>
+    <div class="brow">
+      <button class="btn btn-p" id="sc-retry">Try again ↺</button>
+      <button class="btn btn-s" id="sc-new">New quiz</button>
+    </div>
+    <div style="margin-top:1.25rem;">
+      <div class="ct" style="margin-bottom:.65rem;">Wrong answers — review</div>
+      <div id="sc-review"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+var WL=[["photographer","n.","사진작가","My name is David Parker, and I'm a photographer.","L1"],["realize","v.","실현하다, 깨닫다","Today, I'm going to tell you how I found my dream and realized it.","L1"],["inspire","v.","영감을 주다, 고무하다","I hope my story can inspire you.","L1"],["lead to","phrasal v.","~로 이어지다, ~을 낳다","I never thought these things could lead to a job.","L1"],["decide on","phrasal v.","~을 결정하다","When I had to decide on a major in college, I chose engineering.","L1"],["major","n.","전공","When I had to decide on a major in college, I chose engineering.","L1"],["engineering","n.","공학, 엔지니어링","When I had to decide on a major in college, I chose engineering.","L1"],["stable","adj.","안정적인","It was a stable job, but I didn't know whether I really enjoyed it.","L1"],["Northern Lights","n. phrase","북극광, 오로라","There I got a chance to see the Northern Lights.","L1"],["amazing","adj.","놀라운, 굉장한","The lights were amazing, and I took many pictures of the dancing lights in the sky.","L1"],["beat","v.","두근거리다, 뛰다","For the first time in many years, I could feel my heart beating fast.","L1"],["enter","v.","참가하다, 제출하다","I entered a photo contest with the pictures I took in Iceland.","L1"],["surprisingly","adv.","놀랍게도","Surprisingly, I won first prize, and this gave me a chance to think about my life.","L1"],["prize","n.","상, 상금","Surprisingly, I won first prize, and this gave me a chance to think about my life.","L1"],["photography","n.","사진술, 사진 촬영","I started to learn more about photography.","L1"],["trial and error","n. phrase","시행착오","After years of trial and error, I got better.","L1"],["part-time","adj.","시간제의, 파트타임의","I began to do some part-time work as a photographer.","L1"],["bold","adj.","대담한, 용감한","I made a bold decision.","L1"],["decision","n.","결정, 결심","I made a bold decision.","L1"],["quit","v.","그만두다, 떠나다","I quit my job and decided to take pictures for a living.","L1"],["for a living","idiom","생계를 위해","I quit my job and decided to take pictures for a living.","L1"],["succeed","v.","성공하다","I wasn't sure if I could succeed, but I decided to try.","L1"],["professional","adj.","전문적인, 직업적인","Now, I'm a professional photographer, and I'm happy.","L1"],["pursue","v.","추구하다, 뒤쫓다","Pursuing a dream is not easy.","L1"],["courage","n.","용기","You need courage to make decisions that will change your life.","L1"],["take a chance","idiom","위험을 감수하다, 모험을 하다","I was afraid but I took a chance.","L1"],["incredibly","adv.","믿을 수 없을 정도로, 엄청나게","These days, Dubai chocolate is incredibly popular in Korea.","L1"],["line up","phrasal v.","줄을 서다","Many people are lining up at convenience stores to get one.","L1"],["sold out","adj. phrase","품절된","It was already sold out.","L1"],["debate","n.","토론, 논쟁","There is a debate about whether this expensive chocolate is worth the price.","L1"],["worth","adj.","~의 가치가 있는","There is a debate about whether this expensive chocolate is worth the price.","L1"],["crunchy","adj.","바삭바삭한","Some say the crunchy pistachio filling is amazing.","L1"],["filling","n.","속 재료, 충전재","Some say the crunchy pistachio filling is amazing.","L1"],["foodie","n.","음식에 관심이 많은 사람","It has become a goal for many foodies to taste this unique dessert.","L1"],["unique","adj.","독특한, 유일한","It has become a goal for many foodies to taste this unique dessert.","L1"],["trendy","adj.","유행하는, 최신 유행의","Sharing a trendy dessert with friends is always fun!","L1"],["exist","v.","존재하다","Many of the jobs you are familiar with today didn't actually exist until recently.","L1"],["be familiar with","phrasal v.","~에 익숙하다, ~을 잘 알다","Many of the jobs you are familiar with today didn't actually exist until recently.","L1"],["related to","phrasal v.","~와 관련된","Consider people whose work is related to smartphones.","L1"],["app developer","n. phrase","앱 개발자","Until smartphones became popular in the mid-2000s, there were no 'app developers' or 'app marketers.'","L1"],["data miner","n. phrase","데이터 분석가","One of the most common new jobs is 'data miner.'","L1"],["expert","n.","전문가","Big companies collect large amounts of customer data, but they need experts to study and understand it.","L1"],["pattern","n.","패턴, 양식","These experts look for patterns in customer behavior to help businesses predict future trends.","L1"],["predict","v.","예측하다","Data miners look for patterns in customer behavior to help businesses predict future trends.","L1"],["trend","n.","경향, 추세, 트렌드","Data miners help businesses predict future trends and create more effective advertisements.","L1"],["effective","adj.","효과적인","Data miners help businesses predict future trends and create more effective advertisements.","L1"],["drone operator","n. phrase","드론 조종사","Another recently created job is 'drone operator.'","L1"],["military","n.","군대","Drones were only used by the military or people who flew them as a hobby.","L1"],["delivery","n.","배달, 배송","Online shopping sites are planning to use them to make deliveries.","L1"],["require","v.","필요로 하다, 요구하다","All of these companies will require individuals skilled in flying high-tech drones.","L1"],["individual","n.","개인","All of these companies will require individuals skilled in flying high-tech drones.","L1"],["skilled","adj.","능숙한, 숙련된","All of these companies will require individuals skilled in flying high-tech drones.","L1"],["sustainability expert","n. phrase","지속 가능성 전문가","Some companies are now hiring 'sustainability experts' to help them protect the environment.","L1"],["youth expert","n. phrase","청년 전문가","Other companies are even looking for 'youth experts.'","L1"],["rapidly","adv.","빠르게, 급속히","Examples like these make it clear that job trends are changing rapidly.","L1"],["available","adj.","이용 가능한, 구할 수 있는","Can you imagine what kind of jobs will be available by the time you go out into society?","L1"],["comfort food","n. phrase","위안 음식","Comfort food is food that makes you feel good when you are sad, angry, or stressed out.","L2"],["stressed out","adj. phrase","스트레스를 받은","Comfort food is food that makes you feel good when you are sad, angry, or stressed out.","L2"],["satisfy","v.","만족시키다","It satisfies not only the stomach but also the heart.","L2"],["differ","v.","다르다, 차이가 나다","Comfort foods differ around the world.","L2"],["international","adj.","국제적인","Let's see what comfort foods our international readers enjoy.","L2"],["catch a cold","idiom","감기에 걸리다","When I was a small child, I caught a very bad cold.","L2"],["warm","v.","따뜻하게 하다","The hot soup warmed my body, and I slowly started to feel better.","L2"],["cassava","n.","카사바","In Brazil, there are many dishes that are made with cassava, a vegetable similar to a potato.","L2"],["similar to","phrasal v.","~와 비슷한","Cassava is a vegetable similar to a potato.","L2"],["crisp","adj.","바삭바삭한, 청명한","The crisp sound of eating chips made me feel better.","L2"],["disappear","v.","사라지다","When I started to eat the chips, my stress suddenly disappeared.","L2"],["madeleine","n.","마들렌 (프랑스 케이크)","I love madeleines the most.","L2"],["shell","n.","조개껍데기","A madeleine is a small cake that looks like a sea shell.","L2"],["snack","n.","간식","People in France enjoy madeleines as an afternoon snack.","L2"],["recipe","n.","레시피, 조리법","Let me share my grandmother's special recipe with you.","L2"],["flour","n.","밀가루","You need 1 cup of flour, 2/3 cup of sugar, 2 eggs, some orange peel.","L2"],["orange peel","n. phrase","오렌지 껍질","You need 1 cup of flour, 2/3 cup of sugar, 2 eggs, some orange peel.","L2"],["melt","v.","녹이다, 녹다","Melt the butter and let it cool.","L2"],["mixture","n.","혼합물","Add the butter and orange peel to the mixture and mix.","L2"],["flavor","n.","맛, 풍미","This famous Italian dish appears simple, but its flavor is rich and satisfying.","L2"],["satisfying","adj.","만족스러운","This famous Italian dish appears simple, but its flavor is rich and satisfying.","L2"],["despite","prep.","~에도 불구하고","The sauce is creamy despite not containing any cream.","L2"],["contain","v.","포함하다, 담다","The sauce is creamy despite not containing any cream.","L2"],["texture","n.","질감, 식감","The eggs and cheese melt together to make the smooth texture coat each strand of spaghetti.","L2"],["strand","n.","가닥, 줄","The eggs and cheese melt together to make the smooth texture coat each strand of spaghetti.","L2"],["saltiness","n.","짠맛","The saltiness of the pork and the sharp flavor of the cheese blend perfectly with the mild pasta.","L2"],["blend","v.","섞이다, 어우러지다","The saltiness of the pork and the sharp flavor of the cheese blend perfectly with the mild pasta.","L2"],["comforted","adj.","위안을 받은, 편안해진","The warm plate of pasta immediately made me feel comforted and at ease.","L2"],["at ease","idiom","편안한, 마음이 편한","The warm plate of pasta immediately made me feel comforted and at ease.","L2"],["savory","adj.","맛있는, 풍미 있는","I can enjoy this savory dish whenever I need a mental escape.","L2"],["mental escape","n. phrase","정신적 탈출, 기분 전환","I can enjoy this savory dish whenever I need a mental escape.","L2"],["reminder","n.","상기시키는 것","For me, carbonara is more than just food; it is a reminder that simple things can bring deep comfort.","L2"],["authentic","adj.","정통의, 진짜의","My favorite comfort food is authentic tacos with spicy salsa.","L2"],["traditional","adj.","전통적인","My mother teaches me her traditional cooking secrets.","L2"],["marinate","v.","양념에 재다","We always let the meat marinate in lime juice and spices for hours.","L2"],["tender","adj.","부드러운, 연한","We let the meat marinate in lime juice and spices for hours so that it stays tender and juicy when we grill it.","L2"],["juicy","adj.","즙이 많은, 촉촉한","We let the meat marinate in lime juice and spices for hours so that it stays tender and juicy when we grill it.","L2"],["grill","v.","굽다, 그릴에 굽다","We let the meat marinate in lime juice and spices for hours so that it stays tender and juicy when we grill it.","L2"],["instantly","adv.","즉시, 바로","The wonderful smell of the tortillas made my stress go away instantly.","L2"]];
+
+var KO_SENT={"My name is David Parker, and I'm a photographer.": "제 이름은 David Parker이고, 저는 사진작가입니다.", "Today, I'm going to tell you how I found my dream and realized it.": "오늘 저는 어떻게 꿈을 찾고 실현했는지 이야기해 드리겠습니다.", "I hope my story can inspire you.": "제 이야기가 여러분에게 영감을 줄 수 있기를 바랍니다.", "I never thought these things could lead to a job.": "저는 이런 것들이 직업으로 이어질 수 있다고는 생각하지 못했습니다.", "When I had to decide on a major in college, I chose engineering.": "대학에서 전공을 결정해야 했을 때, 저는 공학을 선택했습니다.", "It was a stable job, but I didn't know whether I really enjoyed it.": "안정적인 직업이었지만, 제가 정말로 그 일을 즐기는지 알 수 없었습니다.", "There I got a chance to see the Northern Lights.": "그곳에서 저는 북극광을 볼 기회를 얻었습니다.", "The lights were amazing, and I took many pictures of the dancing lights in the sky.": "그 빛들은 놀라웠고, 저는 하늘에서 춤추는 빛들의 사진을 많이 찍었습니다.", "For the first time in many years, I could feel my heart beating fast.": "수년 만에 처음으로, 저는 심장이 빠르게 뛰는 것을 느낄 수 있었습니다.", "I entered a photo contest with the pictures I took in Iceland.": "저는 아이슬란드에서 찍은 사진들로 사진 대회에 참가했습니다.", "Surprisingly, I won first prize, and this gave me a chance to think about my life.": "놀랍게도, 저는 1등상을 받았고, 이것이 제 삶에 대해 생각할 기회를 주었습니다.", "I started to learn more about photography.": "저는 사진술에 대해 더 많이 배우기 시작했습니다.", "After years of trial and error, I got better.": "수년간의 시행착오 끝에, 저는 더 나아졌습니다.", "I began to do some part-time work as a photographer.": "저는 사진작가로서 파트타임 일을 하기 시작했습니다.", "I made a bold decision.": "저는 대담한 결정을 내렸습니다.", "I quit my job and decided to take pictures for a living.": "저는 직장을 그만두고 사진 찍는 것으로 생계를 꾸리기로 결심했습니다.", "I wasn't sure if I could succeed, but I decided to try.": "성공할 수 있을지 확신이 없었지만, 저는 시도해 보기로 했습니다.", "Now, I'm a professional photographer, and I'm happy.": "이제 저는 전문 사진작가이고, 행복합니다.", "Pursuing a dream is not easy.": "꿈을 추구하는 것은 쉽지 않습니다.", "You need courage to make decisions that will change your life.": "삶을 바꿀 결정을 내리려면 용기가 필요합니다.", "I was afraid but I took a chance.": "두려웠지만 저는 모험을 감수했습니다.", "These days, Dubai chocolate is incredibly popular in Korea.": "요즘 두바이 초콜릿은 한국에서 믿을 수 없을 정도로 인기 있습니다.", "Many people are lining up at convenience stores to get one.": "많은 사람들이 하나를 사기 위해 편의점에 줄을 서고 있습니다.", "It was already sold out.": "그것은 이미 품절되었습니다.", "There is a debate about whether this expensive chocolate is worth the price.": "이 비싼 초콜릿이 가격만큼의 가치가 있는지에 대한 논쟁이 있습니다.", "Some say the crunchy pistachio filling is amazing.": "일부는 바삭바삭한 피스타치오 속 재료가 놀랍다고 말합니다.", "It has become a goal for many foodies to taste this unique dessert.": "이 독특한 디저트를 맛보는 것이 많은 음식 애호가들의 목표가 되었습니다.", "Sharing a trendy dessert with friends is always fun!": "친구들과 유행하는 디저트를 나누는 것은 언제나 즐겁습니다!", "Many of the jobs you are familiar with today didn't actually exist until recently.": "오늘날 여러분이 잘 알고 있는 많은 직업들은 최근까지 실제로 존재하지 않았습니다.", "Consider people whose work is related to smartphones.": "스마트폰과 관련된 일을 하는 사람들을 생각해 보세요.", "Until smartphones became popular in the mid-2000s, there were no 'app developers' or 'app marketers.'": "2000년대 중반에 스마트폰이 대중화되기 전까지, 앱 개발자나 앱 마케터는 없었습니다.", "One of the most common new jobs is 'data miner.'": "가장 흔한 새로운 직업 중 하나는 데이터 분석가입니다.", "Big companies collect large amounts of customer data, but they need experts to study and understand it.": "대기업들은 많은 양의 고객 데이터를 수집하지만, 그것을 연구하고 이해할 전문가가 필요합니다.", "These experts look for patterns in customer behavior to help businesses predict future trends.": "이 전문가들은 기업이 미래 트렌드를 예측하도록 돕기 위해 고객 행동의 패턴을 찾습니다.", "Data miners help businesses predict future trends and create more effective advertisements.": "데이터 분석가들은 기업이 미래 트렌드를 예측하고 더 효과적인 광고를 만들도록 돕습니다.", "Another recently created job is 'drone operator.'": "최근에 생긴 또 다른 직업은 드론 조종사입니다.", "Drones were only used by the military or people who flew them as a hobby.": "드론은 군대나 취미로 조종하는 사람들만 사용했습니다.", "Online shopping sites are planning to use them to make deliveries.": "온라인 쇼핑 사이트들은 배달을 위해 드론을 사용할 계획입니다.", "All of these companies will require individuals skilled in flying high-tech drones.": "이 모든 기업들은 첨단 드론 조종에 능숙한 개인들을 필요로 할 것입니다.", "Some companies are now hiring 'sustainability experts' to help them protect the environment.": "일부 기업들은 이제 환경 보호를 돕기 위해 지속 가능성 전문가를 고용하고 있습니다.", "Examples like these make it clear that job trends are changing rapidly.": "이런 사례들은 직업 트렌드가 빠르게 변화하고 있다는 것을 분명히 보여줍니다.", "Can you imagine what kind of jobs will be available by the time you go out into society?": "여러분이 사회에 나갈 때쯤 어떤 종류의 직업이 있을지 상상할 수 있나요?", "Comfort food is food that makes you feel good when you are sad, angry, or stressed out.": "위안 음식은 슬프거나 화가 나거나 스트레스를 받을 때 기분을 좋게 해 주는 음식입니다.", "It satisfies not only the stomach but also the heart.": "그것은 배만이 아니라 마음도 만족시킵니다.", "Comfort foods differ around the world.": "위안 음식은 전 세계적으로 다릅니다.", "Let's see what comfort foods our international readers enjoy.": "국제적인 독자들이 즐기는 위안 음식이 무엇인지 알아봅시다.", "When I was a small child, I caught a very bad cold.": "어렸을 때, 저는 아주 심한 감기에 걸렸습니다.", "The hot soup warmed my body, and I slowly started to feel better.": "뜨거운 수프가 몸을 따뜻하게 해 주었고, 저는 천천히 나아지기 시작했습니다.", "Cassava is a vegetable similar to a potato.": "카사바는 감자와 비슷한 채소입니다.", "When I started to eat the chips, my stress suddenly disappeared.": "칩을 먹기 시작하자, 제 스트레스가 갑자기 사라졌습니다.", "The crisp sound of eating chips made me feel better.": "칩을 먹는 바삭바삭한 소리가 기분을 나아지게 했습니다.", "A madeleine is a small cake that looks like a sea shell.": "마들렌은 조개껍데기처럼 생긴 작은 케이크입니다.", "People in France enjoy madeleines as an afternoon snack.": "프랑스 사람들은 마들렌을 오후 간식으로 즐깁니다.", "Let me share my grandmother's special recipe with you.": "할머니의 특별한 레시피를 여러분과 공유하겠습니다.", "You need 1 cup of flour, 2/3 cup of sugar, 2 eggs, some orange peel.": "밀가루 1컵, 설탕 2/3컵, 달걀 2개, 오렌지 껍질 약간이 필요합니다.", "Melt the butter and let it cool.": "버터를 녹이고 식히세요.", "Add the butter and orange peel to the mixture and mix.": "버터와 오렌지 껍질을 혼합물에 넣고 섞으세요.", "This famous Italian dish appears simple, but its flavor is rich and satisfying.": "이 유명한 이탈리아 요리는 단순해 보이지만, 그 맛은 풍부하고 만족스럽습니다.", "The sauce is creamy despite not containing any cream.": "그 소스는 크림이 들어있지 않음에도 불구하고 크리미합니다.", "The eggs and cheese melt together to make the smooth texture coat each strand of spaghetti.": "달걀과 치즈가 함께 녹아 부드러운 질감이 스파게티 각 가닥을 감쌉니다.", "The saltiness of the pork and the sharp flavor of the cheese blend perfectly with the mild pasta.": "돼지고기의 짠맛과 치즈의 강한 풍미가 담백한 파스타와 완벽하게 어우러집니다.", "The warm plate of pasta immediately made me feel comforted and at ease.": "따뜻한 파스타 한 접시가 즉시 저를 위안받고 편안하게 만들어 주었습니다.", "I can enjoy this savory dish whenever I need a mental escape.": "정신적 탈출이 필요할 때마다 이 맛있는 요리를 즐길 수 있습니다.", "For me, carbonara is more than just food; it is a reminder that simple things can bring deep comfort.": "저에게 카르보나라는 단순한 음식 그 이상입니다; 그것은 단순한 것들이 깊은 위안을 줄 수 있다는 것을 상기시켜 줍니다.", "My favorite comfort food is authentic tacos with spicy salsa.": "제가 가장 좋아하는 위안 음식은 매운 살사를 곁들인 정통 타코입니다.", "My mother teaches me her traditional cooking secrets.": "어머니는 저에게 전통 요리 비법을 가르쳐 주십니다.", "We always let the meat marinate in lime juice and spices for hours.": "우리는 항상 고기를 라임 주스와 향신료에 몇 시간 동안 재워 둡니다.", "We let the meat marinate in lime juice and spices for hours so that it stays tender and juicy when we grill it.": "우리는 고기를 구울 때 부드럽고 촉촉하게 유지되도록 라임 주스와 향신료에 몇 시간 동안 재워 둡니다.", "The wonderful smell of the tortillas made my stress go away instantly.": "또띠야의 훌륭한 향이 즉시 제 스트레스를 사라지게 했습니다."};
+var DEFS={"photographer": "a person who takes photographs professionally", "realize": "to make something happen or become aware of something", "inspire": "to fill someone with the urge to do something creative", "lead to": "to result in or cause something", "decide on": "to choose something after careful thought", "major": "the main subject studied at university", "engineering": "the application of science to design and build things", "stable": "not likely to change; secure and steady", "Northern Lights": "colourful lights seen in the sky near the North Pole", "amazing": "very impressive or surprising", "beat": "to make a regular rhythmic sound, like a heart", "enter": "to take part in a competition or submit something", "surprisingly": "in a way that is unexpected", "prize": "an award given for winning a competition", "photography": "the art or practice of taking photographs", "trial and error": "the process of trying different methods until finding one that works", "part-time": "working for only part of the usual working hours", "bold": "willing to take risks; confident and brave", "decision": "a choice made after thinking about options", "quit": "to leave a job or stop doing something", "for a living": "as a way of earning money", "succeed": "to achieve a desired aim or result", "professional": "doing something as a paid job rather than a hobby", "pursue": "to follow or try to achieve something over time", "courage": "the ability to do something frightening or difficult", "take a chance": "to do something risky despite uncertainty", "incredibly": "to a very great degree; extremely", "line up": "to stand in a queue or row", "sold out": "all of a product has been bought and none is left", "debate": "a discussion of different opinions on a topic", "worth": "having a value equal to a price or effort", "crunchy": "making a loud noise when bitten or crushed", "filling": "a substance put inside food or an object", "foodie": "a person with a strong interest in food", "unique": "being the only one of its kind; very special", "trendy": "very fashionable or popular at the moment", "exist": "to be real or present in the world", "be familiar with": "to know something well through experience", "related to": "connected to or about something", "app developer": "a person who creates software applications", "data miner": "an expert who finds patterns in large amounts of data", "expert": "a person with special skill or knowledge in a subject", "pattern": "a repeated design or a regular way something happens", "predict": "to say what will happen in the future", "trend": "a general direction in which something is changing", "effective": "producing the result that is wanted", "drone operator": "a person who controls unmanned flying vehicles", "military": "the armed forces of a country", "delivery": "the act of taking goods to a person or place", "require": "to need something as necessary", "individual": "a single person, especially when seen as different from a group", "skilled": "having the ability to do something well", "sustainability expert": "a specialist in protecting the environment long-term", "youth expert": "a specialist who understands young people's habits and interests", "rapidly": "very quickly", "available": "able to be used or obtained", "comfort food": "food that gives emotional comfort when you feel bad", "stressed out": "feeling very anxious and worried", "satisfy": "to please someone by giving what they want or need", "differ": "to be unlike or not the same as something else", "international": "involving or relating to more than one country", "catch a cold": "to become ill with a cold", "warm": "to make something slightly hot", "cassava": "a tropical plant with starchy roots used as food", "similar to": "looking or being like something else", "crisp": "firm and making a sharp sound when broken or bitten", "disappear": "to stop being visible or to go away", "madeleine": "a small rich shell-shaped French sponge cake", "shell": "the hard outer covering of a sea creature", "snack": "a small amount of food eaten between meals", "recipe": "a set of instructions for preparing a dish", "flour": "a powder made from ground grain used for baking", "orange peel": "the outer skin of an orange", "melt": "to change from solid to liquid by heating", "mixture": "a substance made by combining different things", "flavor": "the particular taste of a food or drink", "satisfying": "giving a sense of fulfilment or pleasure", "despite": "without being affected by something", "contain": "to have something inside or as a part", "texture": "the feel or consistency of a surface or substance", "strand": "a single thin thread or piece of something", "saltiness": "the quality of tasting like salt", "blend": "to mix smoothly together", "comforted": "feeling calm and less worried after receiving support", "at ease": "relaxed and free from worry", "savory": "having a pleasant salty or spicy flavor", "mental escape": "a way of getting relief from stress through enjoyment", "reminder": "something that causes you to remember something", "authentic": "genuinely made in a traditional way", "traditional": "following customs passed down through generations", "marinate": "to soak food in a liquid to add flavor", "tender": "easy to chew; not tough", "juicy": "full of juice; moist and flavorful", "grill": "to cook food on a metal frame over heat", "instantly": "immediately, without any delay"};
+
+
+// ── POS TAGGER for Easy Scramble ──────────────────────────────────
+var POS_COLORS = {
+  'noun':  {bg:'#DBEAFE', border:'#3B82F6', color:'#1E3A8A', label:'Noun'},
+  'verb':  {bg:'#DCFCE7', border:'#22C55E', color:'#14532D', label:'Verb'},
+  'adj':   {bg:'#FEF3C7', border:'#F59E0B', color:'#78350F', label:'Adj/Adv'},
+  'other': {bg:'#F1F5F9', border:'#94A3B8', color:'#334155', label:'Other'}
+};
+
+// Simple rule-based POS tagger for individual tokens
+function tagToken(token) {
+  var t = token.toLowerCase().replace(/[.,!?;:'"()]/g,'');
+  // punctuation / articles / prepositions / conjunctions → other
+  if(/^[.,!?;:'"()\-]+$/.test(token)) return 'other';
+  if(/^(a|an|the|this|that|these|those|it|its|they|their|we|our|you|your|he|his|she|her|i|my)$/.test(t)) return 'other';
+  if(/^(in|on|at|to|for|of|from|with|by|as|into|onto|upon|about|over|under|through|between|among|across|along|around|behind|before|after|during|within|without|against|toward|towards|per|via|near|since|until|up|down|off|out|over|past|around)$/.test(t)) return 'other';
+  if(/^(and|or|but|so|yet|nor|although|because|since|while|if|when|where|that|which|who|whom|whose|what|how|whether|than|as|both|either|neither|not|also|however|therefore|thus|moreover|furthermore|nevertheless|meanwhile|instead|otherwise)$/.test(t)) return 'other';
+  if(/^(is|are|was|were|be|been|being|have|has|had|having|do|does|did|will|would|shall|should|may|might|must|can|could|need|dare|ought|used)$/.test(t)) return 'verb';
+  // verb endings
+  if(/(?:ing|ed|ize|ise|ify|en|ate)$/.test(t) && t.length > 4) return 'verb';
+  if(/(?:s|es)$/.test(t) && t.length > 3 && !/(?:ness|ness|ous|ful|less|ive|al|ic|ical|able|ible|ary|ory|ery)$/.test(t)) return 'verb';
+  // adjective/adverb endings
+  if(/(?:ly|ful|less|ous|ive|al|ical|able|ible|ary|ory|ent|ant|ish|like|ward|wise|ary|ic)$/.test(t)) return 'adj';
+  // noun endings
+  if(/(?:tion|sion|ment|ness|ity|ance|ence|ship|hood|dom|ism|ist|er|or|ure|age|ure|ary|ery|ory|ing)$/.test(t) && t.length > 4) return 'noun';
+  // Capitalised mid-sentence = proper noun
+  if(/^[A-Z]/.test(token) && token !== token.toUpperCase()) return 'noun';
+  return 'noun'; // default to noun
+}
+
+
+// ── CHUNK COLOURS ───────────────────────────────────────────────────
+var CHUNK_PALETTE = [
+  {bg:'#DBEAFE',border:'#3B82F6',color:'#1E3A8A'},
+  {bg:'#DCFCE7',border:'#22C55E',color:'#14532D'},
+  {bg:'#FEF3C7',border:'#F59E0B',color:'#78350F'},
+  {bg:'#FCE7F3',border:'#EC4899',color:'#831843'},
+  {bg:'#EDE9FE',border:'#8B5CF6',color:'#3B0764'},
+  {bg:'#FFEDD5',border:'#F97316',color:'#7C2D12'},
+  {bg:'#CFFAFE',border:'#06B6D4',color:'#164E63'},
+  {bg:'#F0FDF4',border:'#4ADE80',color:'#166534'},
+];
+
+// ── CHUNKER — splits sentence into meaningful phrase groups ─────────
+function chunkSentence(sentence){
+  var words = sentence.split(' ');
+  var chunks = [];
+  var i = 0;
+  while(i < words.length){
+    var w = words[i];
+    var wl = w.toLowerCase().replace(/[.,!?;:'"()]/g,'');
+    // Articles/determiners start a noun chunk → grab 2-3 words
+    if(/^(a|an|the|this|that|these|those|my|your|his|her|its|our|their|no|every|each|any|some)$/.test(wl)){
+      var chunk=[w];
+      if(i+1<words.length) chunk.push(words[i+1]);
+      // optionally grab one more if next-next is adj/noun
+      if(i+2<words.length){
+        var nx=words[i+2].toLowerCase().replace(/[.,!?;:'"()]/g,'');
+        if(!/^(is|are|was|were|be|have|has|had|will|would|can|could|should|may|might|must|to|that|which|who|in|on|at|of|by|from|with|for|and|or|but|,|.)$/.test(nx)){
+          chunk.push(words[i+2]);
+          i+=3;
+        } else { i+=2; }
+      } else { i+=2; }
+      chunks.push(chunk.join(' '));
+    }
+    // Prepositions → grab preposition + next 1-2 words
+    else if(/^(in|on|at|to|for|of|from|with|by|into|onto|about|over|under|through|between|among|across|along|around|behind|before|after|during|without|against|toward|towards|near|since|until|up|down|off|out|past|despite|through)$/.test(wl)){
+      var chunk=[w];
+      if(i+1<words.length) chunk.push(words[i+1]);
+      if(i+2<words.length){
+        var nx2=words[i+2].toLowerCase().replace(/[.,!?;:'"()]/g,'');
+        if(!/^(in|on|at|to|for|of|from|with|by|and|or|but|,|.|that|which|who|is|are|was|were|will|would|can|could|should|may|might|must)$/.test(nx2)){
+          chunk.push(words[i+2]);
+          i+=3;
+        } else { i+=2; }
+      } else { i+=2; }
+      chunks.push(chunk.join(' '));
+    }
+    // Aux verbs → group with main verb
+    else if(/^(is|are|was|were|be|been|being|have|has|had|will|would|shall|should|may|might|must|can|could|do|does|did|not|never|also|often|usually|always|sometimes|never)$/.test(wl)){
+      var chunk=[w];
+      if(i+1<words.length) chunk.push(words[i+1]);
+      i+=2;
+      chunks.push(chunk.join(' '));
+    }
+    // Infinitive 'to' → group with verb
+    else if(wl==='to' && i+1<words.length){
+      chunks.push(w+' '+words[i+1]);
+      i+=2;
+    }
+    // Conjunction/comma → standalone
+    else if(/^[,.]$/.test(w)||/^(and|or|but|so|yet|although|because|since|while|if|when|where|that|which|who|whom|whose|what|how|whether|than|as|both|either|neither|however|therefore|thus|moreover|furthermore|nevertheless|meanwhile|instead|otherwise|—|-)$/.test(wl)){
+      // attach to previous chunk if possible
+      if(chunks.length>0 && /^[,.]$/.test(w)){
+        chunks[chunks.length-1]+=w;
+      } else {
+        chunks.push(w);
+      }
+      i++;
+    }
+    // Default: standalone word (verb, adjective, adverb, unknown)
+    else {
+      // try to grab next word if it's an adverb or adjective modifier
+      if(i+1<words.length){
+        var nx3=words[i+1].toLowerCase().replace(/[.,!?;:'"()]/g,'');
+        if(/(?:ly|fully|lessly|ingly)$/.test(nx3) || /^(very|quite|rather|fairly|pretty|extremely|highly|deeply|truly|really|absolutely|completely|totally|largely|mostly|mainly|especially|particularly|significantly|considerably|increasingly)$/.test(nx3)){
+          chunks.push(w+' '+words[i+1]);
+          i+=2;
+        } else {
+          chunks.push(w);
+          i++;
+        }
+      } else {
+        chunks.push(w);
+        i++;
+      }
+    }
+  }
+  // Safety: if too few chunks (<3), fall back to 2-3 word groups
+  if(chunks.length < 3){
+    chunks=[];
+    for(var j=0;j<words.length;j+=2){
+      if(j+1<words.length) chunks.push(words[j]+' '+words[j+1]);
+      else chunks.push(words[j]);
+    }
+  }
+  return chunks;
+}
+
+// ─── STATE ─────────────────────────────────────
+var ALL_Q=[...new Set(WL.map(function(w){return w[4];}))].sort(function(a,b){
+  return parseInt(a.replace(/\D/g,''))-parseInt(b.replace(/\D/g,''));
+});
+var tSel=new Set(), sSel=new Set();
+var quizWords=[], answered={}, correct=0, wrong=0, quizMode='mc';
+
+// ─── TABS ───────────────────────────────────────
+document.getElementById('tab-btn-teacher').addEventListener('click',function(){
+  document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  this.classList.add('active');
+  document.getElementById('panel-teacher').classList.add('active');
+});
+document.getElementById('tab-btn-student').addEventListener('click',function(){
+  document.querySelectorAll('.nav-tab').forEach(function(b){b.classList.remove('active');});
+  document.querySelectorAll('.panel').forEach(function(p){p.classList.remove('active');});
+  this.classList.add('active');
+  document.getElementById('panel-student').classList.add('active');
+});
+
+// ─── BUILD Q GRIDS ──────────────────────────────
+function buildGrid(containerId, selSet, ctrId){
+  var g=document.getElementById(containerId);
+  ALL_Q.forEach(function(q){
+    var b=document.createElement('button');
+    b.className='qbtn';
+    b.textContent=q;
+    b.addEventListener('click',function(){
+      b.classList.toggle('on');
+      if(selSet.has(q)) selSet.delete(q);
+      else selSet.add(q);
+      updateCtr(selSet, ctrId);
+    });
+    g.appendChild(b);
+  });
+}
+buildGrid('tq-grid', tSel, 'tq-ctr');
+buildGrid('sq-grid', sSel, 'sq-ctr');
+
+function updateCtr(sel, ctrId){
+  var n=WL.filter(function(w){return sel.has(w[4]);}).length;
+  var el=document.getElementById(ctrId);
+  el.innerHTML='<strong>'+n+'</strong> words from <strong>'+sel.size+'</strong> question(s)';
+}
+
+// Select/Clear all
+document.getElementById('tq-all').addEventListener('click',function(){
+  document.querySelectorAll('#tq-grid .qbtn').forEach(function(b){b.classList.add('on');tSel.add(b.textContent);});
+  updateCtr(tSel,'tq-ctr');
+});
+document.getElementById('tq-clr').addEventListener('click',function(){
+  document.querySelectorAll('#tq-grid .qbtn').forEach(function(b){b.classList.remove('on');});
+  tSel.clear(); updateCtr(tSel,'tq-ctr');
+});
+document.getElementById('sq-all').addEventListener('click',function(){
+  document.querySelectorAll('#sq-grid .qbtn').forEach(function(b){b.classList.add('on');sSel.add(b.textContent);});
+  updateCtr(sSel,'sq-ctr');
+});
+document.getElementById('sq-clr').addEventListener('click',function(){
+  document.querySelectorAll('#sq-grid .qbtn').forEach(function(b){b.classList.remove('on');});
+  sSel.clear(); updateCtr(sSel,'sq-ctr');
+});
+
+// ─── HELPERS ───────────────────────────────────
+function shuffle(a){
+  var b=[].concat(a);
+  for(var i=b.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=b[i];b[i]=b[j];b[j]=t;}
+  return b;
+}
+function makeFill(word, sentence){
+  // First try exact match (case-insensitive)
+  var clean=word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  var re=new RegExp(clean,'i');
+  if(re.test(sentence)) return sentence.replace(re,'________');
+
+  // For phrasal verbs/idioms: try matching the key content words
+  // e.g. "be committed to" → try "committed to"
+  //      "be rooted in"    → try "rooted in"
+  //      "be familiar with"→ try "familiar with"
+  var stripped=word.replace(/^(be|get|make|have|do|feel|come|go|take|give|put|set|bring|keep|let|turn|look|run|fall|hold|stand|stay|become|seem|appear)\s+/i,'');
+  if(stripped!==word){
+    var re2=new RegExp(stripped.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i');
+    if(re2.test(sentence)) return sentence.replace(re2,'________');
+  }
+
+  // Try matching just the first key word of multi-word phrases
+  var firstWord=word.split(' ')[0];
+  if(firstWord.length>3){
+    var re3=new RegExp('\\b'+firstWord.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\w*\\b','i');
+    if(re3.test(sentence)) return sentence.replace(re3,'________');
+  }
+
+  // Last resort: show sentence with hint in brackets
+  return sentence+' ['+word+']';
+}
+function showStatus(id, msg, cls){
+  var el=document.getElementById(id);
+  el.textContent=msg; el.className='st '+cls; el.style.display='block';
+}
+function getDecoys(correctKo, count){
+  var pool=WL.filter(function(w){return w[2]!==correctKo;}).map(function(w){return w[2];});
+  return shuffle(pool).slice(0,count||3);
+}
+function getWordDecoys(correctWord, count){
+  var pool=WL.filter(function(w){return w[0]!==correctWord;}).map(function(w){return w[0];});
+  return shuffle(pool).slice(0,count||3);
+}
+
+// ─── TEACHER ───────────────────────────────────
+function tGetWords(){
+  var w=WL.filter(function(x){return tSel.has(x[4]);});
+  return document.getElementById('t-sh').checked?shuffle(w):w;
+}
+
+document.getElementById('t-prev-btn').addEventListener('click',function(){
+  var words=tGetWords();
+  if(!words.length){showStatus('t-status','Please select at least one question.','er');return;}
+  var oKo=document.getElementById('t-ko').checked;
+  var oEn=document.getElementById('t-en').checked;
+  var oFi=document.getElementById('t-fi').checked;
+  var oPo=document.getElementById('t-po').checked;
+  if(!oKo&&!oEn&&!oFi&&!oPo){showStatus('t-status','Select at least one quiz type.','er');return;}
+  var h='<table style="width:100%;border-collapse:collapse;"><tr style="background:var(--acc);color:#fff;">';
+  h+='<th style="padding:5px 7px;font-size:11px;">#</th><th style="padding:5px 7px;font-size:11px;">Q</th><th style="padding:5px 7px;font-size:11px;">Word</th>';
+  if(oKo) h+='<th style="padding:5px 7px;font-size:11px;">① Korean</th>';
+  if(oEn) h+='<th style="padding:5px 7px;font-size:11px;">② English</th>';
+  if(oFi) h+='<th style="padding:5px 7px;font-size:11px;">③ Fill-blank</th>';
+  if(oPo) h+='<th style="padding:5px 7px;font-size:11px;">④ POS</th>';
+  h+='</tr>';
+  words.slice(0,6).forEach(function(row,i){
+    var bg=i%2?'background:var(--sf2)':'';
+    h+='<tr style="'+bg+'"><td style="padding:4px 7px;">'+( i+1)+'</td>';
+    h+='<td style="padding:4px 7px;font-size:10px;font-weight:700;">'+row[4]+'</td>';
+    h+='<td style="padding:4px 7px;font-weight:600;">'+row[0]+'</td>';
+    if(oKo) h+='<td style="padding:4px 7px;color:var(--ink3);">___________</td>';
+    if(oEn) h+='<td style="padding:4px 7px;color:var(--ink3);">___________</td>';
+    if(oFi) h+='<td style="padding:4px 7px;font-size:11px;color:var(--ink2);">'+makeFill(row[0],row[3]).substring(0,55)+'...</td>';
+    if(oPo) h+='<td style="padding:4px 7px;color:var(--ink3);">___________</td>';
+    h+='</tr>';
+  });
+  if(words.length>6) h+='<tr><td colspan="10" style="padding:4px 7px;color:var(--ink3);font-size:11px;">...and '+(words.length-6)+' more</td></tr>';
+  h+='</table>';
+  document.getElementById('t-preview').innerHTML=h;
+  showStatus('t-status','Preview: '+words.length+' words from '+[...tSel].join(', '),'ok');
+});
+
+document.getElementById('t-gen-btn').addEventListener('click',function(){
+  var words=tGetWords();
+  if(!words.length){showStatus('t-status','Please select at least one question.','er');return;}
+  var oKo=document.getElementById('t-ko').checked;
+  var oEn=document.getElementById('t-en').checked;
+  var oFi=document.getElementById('t-fi').checked;
+  var oPo=document.getElementById('t-po').checked;
+  var oKy=document.getElementById('t-ky').checked;
+  var cls=document.getElementById('t-cls').value||'';
+  if(!oKo&&!oEn&&!oFi&&!oPo){showStatus('t-status','Select at least one quiz type.','er');return;}
+  var wb=XLSX.utils.book_new();
+  var qLabel=[...tSel].sort().join(', ');
+  var today=new Date().toISOString().slice(0,10);
+  var qs=[
+    ['중3 동아(윤정미) 영어 교과서 — Vocabulary Quiz'],
+    ['Questions: '+qLabel+'   |   Total: '+words.length+' words   |   Date: '+today+(cls?' | Class: '+cls:'')],
+    ['Name:','','Score:','/ '+words.length*[oKo,oEn,oFi,oPo].filter(Boolean).length],
+    []
+  ];
+  var hdr=['#','Source','Word / Phrase'];
+  if(oKo) hdr.push('① Korean meaning (한국어 뜻)');
+  if(oEn) hdr.push('② English word (영어 단어)');
+  if(oFi) hdr.push('③ Fill in the blank (빈칸 채우기)');
+  if(oPo) hdr.push('④ Part of speech (품사)');
+  qs.push(hdr);
+  words.forEach(function(w,i){
+    var row=[i+1,w[4],w[0]];
+    if(oKo) row.push('');
+    if(oEn) row.push('');
+    if(oFi) row.push(makeFill(w[0],w[3]));
+    if(oPo) row.push('');
+    qs.push(row);
+  });
+  var wsQ=XLSX.utils.aoa_to_sheet(qs);
+  var wc=[{wch:4},{wch:9},{wch:28}];
+  if(oKo) wc.push({wch:28}); if(oEn) wc.push({wch:28}); if(oFi) wc.push({wch:60}); if(oPo) wc.push({wch:18});
+  wsQ['!cols']=wc;
+  XLSX.utils.book_append_sheet(wb,wsQ,'Quiz');
+  if(oKy){
+    var ks=[['ANSWER KEY — 2026학년도 3월 고2 영어'],['Questions: '+qLabel+'   |   '+words.length+' words'],[]];
+    var kh=['#','Q','Word','POS'];
+    if(oKo) kh.push('① Korean'); if(oEn) kh.push('② English'); if(oFi) kh.push('③ Fill answer'); if(oPo) kh.push('④ POS');
+    ks.push(kh);
+    words.forEach(function(w,i){
+      var r=[i+1,w[4],w[0],w[1]];
+      if(oKo) r.push(w[2]); if(oEn) r.push(w[0]); if(oFi) r.push(w[0]); if(oPo) r.push(w[1]);
+      ks.push(r);
+    });
+    ks.push([]); ks.push(['— Example Sentences —']);
+    words.forEach(function(w,i){ks.push([i+1,w[0],w[3]]);});
+    var wsK=XLSX.utils.aoa_to_sheet(ks);
+    wsK['!cols']=[{wch:4},{wch:9},{wch:28},{wch:14},{wch:30},{wch:30},{wch:60},{wch:18}];
+    XLSX.utils.book_append_sheet(wb,wsK,'Answer Key');
+  }
+  var rs=[['Word Reference'],[], ['#','Q','Word','POS','Korean','Example Sentence']];
+  words.forEach(function(w,i){rs.push([i+1,w[4],w[0],w[1],w[2],w[3]]);});
+  var wsR=XLSX.utils.aoa_to_sheet(rs);
+  wsR['!cols']=[{wch:4},{wch:9},{wch:28},{wch:14},{wch:30},{wch:70}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Word Reference');
+  var fname='vocab_quiz_'+qLabel.replace(/,\s*/g,'+')+'_'+today+'.xlsx';
+  XLSX.writeFile(wb,fname);
+  showStatus('t-status','Downloaded: '+fname+' ('+words.length+' words)','ok');
+});
+
+// ─── STUDENT: MODE SELECT ──────────────────────
+['mc','fi','fi2','w1','w2','scr','scr2','scr3'].forEach(function(m){
+  var el=document.getElementById('mode-'+m);
+  if(!el) return;
+  el.addEventListener('click',function(e){
+    e.stopPropagation(); // prevent cat card toggle
+    quizMode=m;
+    ['mc','fi','fi2','w1','w2','scr','scr2','scr3'].forEach(function(id){
+      var el2=document.getElementById('mode-'+id);
+      if(el2) el2.classList.toggle('sel',id===m);
+    });
+  });
+});
+
+function toggleCat(cat){
+  var body=document.getElementById('body-'+cat);
+  var arrow=document.getElementById('arrow-'+cat);
+  var card=document.getElementById('cat-'+cat);
+  var isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  arrow.textContent=isOpen?'▶':'▼';
+  card.classList.toggle('cat-active',!isOpen);
+}
+
+// Open vocab category by default
+toggleCat('vocab');
+
+// ─── STUDENT: START ────────────────────────────
+document.getElementById('s-start').addEventListener('click',function(){
+  var words=WL.filter(function(w){return sSel.has(w[4]);});
+  if(words.length<4){showStatus('s-status','Please select at least 4 words (needed for multiple choice).','er');return;}
+  if(document.getElementById('s-sh').checked) words=shuffle(words);
+  quizWords=words;
+  answered={}; correct=0; wrong=0;
+  document.getElementById('s-setup').style.display='none';
+  document.getElementById('s-score').style.display='none';
+  document.getElementById('s-quiz').style.display='block';
+  updateLive();
+  renderQuiz();
+});
+
+function updateLive(){
+  var total=quizWords.length, done=correct+wrong;
+  document.getElementById('ls-c').textContent=correct;
+  document.getElementById('ls-w').textContent=wrong;
+  document.getElementById('ls-r').textContent=total-done;
+  document.getElementById('ls-p').textContent=done>0?Math.round(correct/done*100)+'%':'—';
+  document.getElementById('prog').style.width=(total>0?done/total*100:0)+'%';
+}
+
+// ─── RENDER QUIZ ───────────────────────────────
+function renderQuiz(){
+  var c=document.getElementById('q-container');
+  c.innerHTML='';
+  quizWords.forEach(function(w,i){
+    c.appendChild(makeQCard(w,i));
+  });
+}
+
+function makeQCard(w,idx){
+  var word=w[0],pos=w[1],ko=w[2],ex=w[3],q=w[4];
+  var div=document.createElement('div');
+  div.className='qcard';
+  div.id='card_'+idx;
+
+  // determine type
+  var type;
+  if(quizMode==='mc') type='mc_ko';
+  else if(quizMode==='fi') type='fill';
+  else if(quizMode==='fi2') type='fill2';
+  else if(quizMode==='w1') type='write_ko';
+  else if(quizMode==='w2') type='write_def';
+  else if(quizMode==='scr') type='scramble';
+  else if(quizMode==='scr2') type='scramble2';
+  else if(quizMode==='scr3') type='scramble3';
+  else type='mc_ko';
+
+  // meta
+  var meta='<div class="qmeta">';
+  meta+='<span class="qnum">Q'+(idx+1)+'/'+quizWords.length+'</span>';
+  meta+='<span class="badge b'+q.replace('-','')+'">'+q+'</span>';
+  if(type==='mc_ko') meta+='<span class="tbadge">English → Korean</span>';
+  else if(type==='mc_en') meta+='<span class="tbadge">Korean → English</span>';
+  else if(type==='write_ko') meta+='<span class="tbadge">✍️ Korean → Type English</span>';
+  else if(type==='write_def') meta+='<span class="tbadge">✍️ Definition → Type English</span>';
+  else if(type==='scramble') meta+='<span class="tbadge">🔀 Scramble</span>';
+  else if(type==='scramble2') meta+='<span class="tbadge">🌈 Medium Scramble</span>';
+  else if(type==='scramble3') meta+='<span class="tbadge">🧩 Easy Chunks</span>';
+  else if(type==='fill2') meta+='<span class="tbadge">✏️ Fill + 🇰🇷</span>';
+  else meta+='<span class="tbadge">Fill in the blank</span>';
+  meta+='</div>';
+  div.innerHTML=meta;
+
+  if(type==='mc_ko'){
+    var p=document.createElement('div');
+    p.className='qprompt';
+    p.textContent=word+' ('+pos+')';
+    div.appendChild(p);
+    // hints hidden before answer — shown in explanation after
+    var opts=shuffle([ko].concat(getDecoys(ko)));
+    var optDiv=document.createElement('div');
+    optDiv.className='opts';
+    opts.forEach(function(o,i){
+      var b=document.createElement('button');
+      b.className='obtn';
+      b.textContent=String.fromCharCode(65+i)+'. '+o;
+      b.addEventListener('click',(function(opt,btn,correctOpt){
+        return function(){
+          if(answered[idx]!==undefined) return;
+          answered[idx]=opt;
+          var ok=opt===correctOpt;
+          if(ok) correct++; else wrong++;
+          updateLive();
+          optDiv.querySelectorAll('.obtn').forEach(function(b2){
+            b2.disabled=true;
+            var text=b2.textContent.slice(3);
+            if(text===correctOpt) b2.classList.add('correct');
+            else if(b2===btn&&!ok) b2.classList.add('wrong');
+          });
+          if(document.getElementById('s-rv').checked) showExpl(idx,word,ko,pos,ex);
+        };
+      })(o, b, ko));
+      optDiv.appendChild(b);
+    });
+    div.appendChild(optDiv);
+
+  } else if(type==='mc_en'){
+    var p2=document.createElement('div');
+    p2.className='qprompt';
+    p2.textContent=ko;
+    div.appendChild(p2);
+    // hints hidden before answer — shown in explanation after
+    var opts2=shuffle([word].concat(getWordDecoys(word)));
+    var optDiv2=document.createElement('div');
+    optDiv2.className='opts';
+    opts2.forEach(function(o,i){
+      var b=document.createElement('button');
+      b.className='obtn';
+      b.textContent=String.fromCharCode(65+i)+'. '+o;
+      b.addEventListener('click',(function(opt,btn,correctOpt){
+        return function(){
+          if(answered[idx]!==undefined) return;
+          answered[idx]=opt;
+          var ok=opt===correctOpt;
+          if(ok) correct++; else wrong++;
+          updateLive();
+          optDiv2.querySelectorAll('.obtn').forEach(function(b2){
+            b2.disabled=true;
+            var text=b2.textContent.slice(3);
+            if(text===correctOpt) b2.classList.add('correct');
+            else if(b2===btn&&!ok) b2.classList.add('wrong');
+          });
+          if(document.getElementById('s-rv').checked) showExpl(idx,word,ko,pos,ex);
+        };
+      })(o, b, word));
+      optDiv2.appendChild(b);
+    });
+    div.appendChild(optDiv2);
+
+  } else if(type==='write_ko'||type==='write_def'){
+    // Writing quiz: show Korean meaning OR English definition → type the English word
+    var wp=document.createElement('div');
+    wp.className='qprompt';
+    if(type==='write_ko'){
+      wp.textContent=ko;
+    } else {
+      wp.textContent=DEFS[word]?DEFS[word]:'(see example below)';
+    }
+    div.appendChild(wp);
+    // Show the other as a secondary hint
+    // secondary hint hidden before answer
+    // Example sentence hint (shown after wrong answer)
+    var wfrow=document.createElement('div');
+    wfrow.className='frow';
+    var winp=document.createElement('input');
+    winp.type='text';
+    winp.className='finp';
+    winp.id='fi_'+idx;
+    winp.placeholder='Type the English word...';
+    var wbtn=document.createElement('button');
+    wbtn.className='btn btn-s';
+    wbtn.textContent='Check';
+    var wfn=(function(input, correctWord, cardIdx, cardKo, cardPos, cardEx, row){
+      return function(){
+        if(answered[cardIdx]!==undefined) return;
+        var val=input.value.trim();
+        var ok=(val===correctWord);
+        answered[cardIdx]=val;
+        if(ok){correct++;input.classList.add('correct');}
+        else{wrong++;input.classList.add('wrong');}
+        input.disabled=true;
+        wbtn.disabled=true;
+        var ans=document.createElement('div');
+        ans.style.cssText='font-size:12px;margin-top:5px;font-weight:600;';
+        ans.style.color=ok?'var(--grn)':'var(--red)';
+        ans.textContent=(ok?'✓ Correct! ':'✗ Correct answer: ')+correctWord;
+        row.appendChild(ans);
+        // Also show example sentence on wrong
+        if(!ok){
+          var hint=document.createElement('div');
+          hint.style.cssText='font-size:11px;margin-top:4px;color:var(--ink3);font-style:italic;';
+          hint.textContent='e.g. '+cardEx;
+          row.appendChild(hint);
+        }
+        updateLive();
+        if(document.getElementById('s-rv').checked) showExpl(cardIdx,correctWord,cardKo,cardPos,cardEx);
+      };
+    })(winp, word, idx, ko, pos, ex, wfrow);
+    winp.addEventListener('keydown',function(e){if(e.key==='Enter') wfn();});
+    wbtn.addEventListener('click',wfn);
+    wfrow.appendChild(winp);
+    wfrow.appendChild(wbtn);
+    div.appendChild(wfrow);
+
+  } else if(type==='scramble'){
+    var sDiv=document.createElement('div');
+
+    // Target word + Korean scaffold
+    var swl=document.createElement('div');
+    swl.style.cssText='font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px;';
+    swl.textContent=word+' ('+pos+')';
+    sDiv.appendChild(swl);
+
+    var swk=document.createElement('div');
+    swk.style.cssText='font-size:12px;margin-bottom:.9rem;line-height:1.6;';
+    var koSent=KO_SENT[ex]||'';
+    swk.innerHTML='&#127472;&#127479; <span style="color:#1E6B3C;font-weight:600;">'+(koSent||ko)+'</span>';
+    sDiv.appendChild(swk);
+
+    // Instruction
+    var instr=document.createElement('div');
+    instr.style.cssText='font-size:11px;color:var(--ink3);margin-bottom:.6rem;';
+    instr.textContent='Click a word to move it to your answer. Click again to return it.';
+    sDiv.appendChild(instr);
+
+    // Tokenise sentence
+    var tokens=ex.split(' ');
+    var shuffled=tokens.slice().sort(function(){return Math.random()-.5;});
+    var safetyNet=0;
+    while(shuffled.join(' ')===tokens.join(' ')&&safetyNet<15){
+      shuffled=tokens.slice().sort(function(){return Math.random()-.5;});
+      safetyNet++;
+    }
+
+    // Word bank
+    var bankTitle=document.createElement('div');
+    bankTitle.style.cssText='font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;';
+    bankTitle.textContent='Word Bank';
+    sDiv.appendChild(bankTitle);
+
+    var bankZone=document.createElement('div');
+    bankZone.style.cssText='min-height:50px;border:2px dashed #b0b8c4;border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;background:var(--sf);margin-bottom:.9rem;';
+    sDiv.appendChild(bankZone);
+
+    // Answer zone
+    var ansTitle=document.createElement('div');
+    ansTitle.style.cssText='font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;';
+    ansTitle.textContent='Your Answer';
+    sDiv.appendChild(ansTitle);
+
+    var ansZone=document.createElement('div');
+    ansZone.style.cssText='min-height:50px;border:2px dashed #b0b8c4;border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;background:var(--sf);margin-bottom:.75rem;';
+    sDiv.appendChild(ansZone);
+
+    // Feedback div
+    var fb=document.createElement('div');
+    fb.style.cssText='font-size:13px;font-weight:600;min-height:20px;margin-bottom:.5rem;';
+    sDiv.appendChild(fb);
+
+    // Correct answer (hidden)
+    var keyDiv=document.createElement('div');
+    keyDiv.style.cssText='display:none;font-size:12px;color:#1E6B3C;font-style:italic;padding:6px 10px;background:#E3F5EB;border-radius:8px;border-left:3px solid #1E6B3C;margin-bottom:.5rem;';
+    sDiv.appendChild(keyDiv);
+
+    // Chip maker — uses span, not button, to avoid nesting issues
+    function makeWordChip(text){
+      var chip=document.createElement('span');
+      chip.textContent=text;
+      chip.style.cssText='display:inline-block;padding:7px 13px;background:#fff;border:1.5px solid #b0b8c4;border-radius:20px;font-size:13px;color:var(--ink);cursor:pointer;user-select:none;font-family:inherit;transition:background .15s,transform .1s;';
+      chip.addEventListener('mouseenter',function(){if(!chip.dataset.locked)chip.style.background='#E3EEF7';});
+      chip.addEventListener('mouseleave',function(){if(!chip.dataset.locked)chip.style.background='#fff';});
+      chip.addEventListener('click',function(){
+        if(answered[idx]!==undefined||chip.dataset.locked) return;
+        if(chip.parentElement===bankZone){
+          ansZone.appendChild(chip);
+        } else if(chip.parentElement===ansZone){
+          bankZone.appendChild(chip);
+        }
+      });
+      return chip;
+    }
+
+    // Populate bank
+    shuffled.forEach(function(t){ bankZone.appendChild(makeWordChip(t)); });
+
+    // Buttons row
+    var btnRow=document.createElement('div');
+    btnRow.style.cssText='display:flex;gap:8px;flex-wrap:wrap;margin-top:.25rem;';
+
+    var checkBtn=document.createElement('button');
+    checkBtn.textContent='Check ✓';
+    checkBtn.className='btn btn-p';
+    checkBtn.style.fontSize='13px';
+    checkBtn.type='button';
+    checkBtn.addEventListener('click',function(){
+      if(answered[idx]!==undefined) return;
+      var chips=[].slice.call(ansZone.querySelectorAll('span'));
+      if(chips.length===0){
+        fb.textContent='Add words to your answer first!';
+        fb.style.color='var(--red)';
+        return;
+      }
+      var attempt=chips.map(function(c){return c.textContent;});
+      var ok=(attempt.join(' ')===tokens.join(' '));
+      answered[idx]=attempt.join(' ');
+
+      // Lock all chips
+      var allChips=[].slice.call(bankZone.querySelectorAll('span')).concat([].slice.call(ansZone.querySelectorAll('span')));
+      allChips.forEach(function(c){
+        c.dataset.locked='1';
+        c.style.cursor='default';
+      });
+
+      if(ok){
+        correct++;
+        fb.textContent='✓ Perfect!';
+        fb.style.color='var(--grn)';
+        ansZone.style.borderColor='var(--grn)';
+        ansZone.style.background='var(--grn-l)';
+        chips.forEach(function(c){c.style.background='var(--grn-l)';c.style.borderColor='var(--grn)';c.style.color='var(--grn)';});
+      } else {
+        wrong++;
+        fb.textContent='✗ Not quite — check the order';
+        fb.style.color='var(--red)';
+        ansZone.style.borderColor='var(--red)';
+        ansZone.style.background='var(--red-l)';
+        chips.forEach(function(c){c.style.background='var(--red-l)';c.style.borderColor='var(--red)';c.style.color='var(--red)';});
+        keyDiv.textContent='✓ '+ex;
+        keyDiv.style.display='block';
+      }
+      checkBtn.disabled=true;
+      resetBtn.disabled=true;
+      updateLive();
+      if(document.getElementById('s-rv').checked) showExpl(idx,word,ko,pos,ex);
+    });
+
+    var resetBtn=document.createElement('button');
+    resetBtn.textContent='Reset ↺';
+    resetBtn.className='btn btn-s';
+    resetBtn.style.fontSize='13px';
+    resetBtn.type='button';
+    resetBtn.addEventListener('click',function(){
+      if(answered[idx]!==undefined) return;
+      [].slice.call(ansZone.querySelectorAll('span')).forEach(function(c){bankZone.appendChild(c);});
+      fb.textContent=''; fb.style.color='';
+      keyDiv.style.display='none'; keyDiv.textContent='';
+      ansZone.style.borderColor='#b0b8c4'; ansZone.style.background='var(--sf)';
+    });
+
+    btnRow.appendChild(checkBtn);
+    btnRow.appendChild(resetBtn);
+    sDiv.appendChild(btnRow);
+    div.appendChild(sDiv);
+
+  } else if(type==='scramble2'){
+    var sDiv2=document.createElement('div');
+
+    // Target word + Korean scaffold
+    var swl2=document.createElement('div');
+    swl2.style.cssText='font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px;';
+    swl2.textContent=word+' ('+pos+')';
+    sDiv2.appendChild(swl2);
+
+    var swk2=document.createElement('div');
+    swk2.style.cssText='font-size:12px;margin-bottom:.75rem;line-height:1.6;';
+    var koSent2=KO_SENT[ex]||'';
+    swk2.innerHTML='&#127472;&#127479; <span style="color:#1E6B3C;font-weight:600;">'+(koSent2||ko)+'</span>';
+    sDiv2.appendChild(swk2);
+
+    // POS legend
+    var legend=document.createElement('div');
+    legend.style.cssText='display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.75rem;';
+    Object.keys(POS_COLORS).forEach(function(k){
+      var c=POS_COLORS[k];
+      var tag=document.createElement('span');
+      tag.style.cssText='font-size:10px;padding:2px 8px;border-radius:10px;border:1.5px solid '+c.border+';background:'+c.bg+';color:'+c.color+';font-weight:700;';
+      tag.textContent=c.label;
+      legend.appendChild(tag);
+    });
+    sDiv2.appendChild(legend);
+
+    // Instruction
+    var instr2=document.createElement('div');
+    instr2.style.cssText='font-size:11px;color:var(--ink3);margin-bottom:.6rem;';
+    instr2.textContent='Click a word chip to move it. Colour = part of speech.';
+    sDiv2.appendChild(instr2);
+
+    // Tokenise
+    var tokens2=ex.split(' ');
+    var shuffled2=tokens2.slice().sort(function(){return Math.random()-.5;});
+    var safety2=0;
+    while(shuffled2.join(' ')===tokens2.join(' ')&&safety2<15){
+      shuffled2=tokens2.slice().sort(function(){return Math.random()-.5;});
+      safety2++;
+    }
+
+    // Bank label
+    var bankTitle2=document.createElement('div');
+    bankTitle2.style.cssText='font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;';
+    bankTitle2.textContent='Word Bank';
+    sDiv2.appendChild(bankTitle2);
+
+    var bankZone2=document.createElement('div');
+    bankZone2.style.cssText='min-height:50px;border:2px dashed #b0b8c4;border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;background:var(--sf);margin-bottom:.9rem;';
+    sDiv2.appendChild(bankZone2);
+
+    // Answer label
+    var ansTitle2=document.createElement('div');
+    ansTitle2.style.cssText='font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;';
+    ansTitle2.textContent='Your Answer';
+    sDiv2.appendChild(ansTitle2);
+
+    var ansZone2=document.createElement('div');
+    ansZone2.style.cssText='min-height:50px;border:2px dashed #b0b8c4;border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:6px;background:var(--sf);margin-bottom:.75rem;';
+    sDiv2.appendChild(ansZone2);
+
+    var fb2=document.createElement('div');
+    fb2.style.cssText='font-size:13px;font-weight:600;min-height:20px;margin-bottom:.5rem;';
+    sDiv2.appendChild(fb2);
+
+    var keyDiv2=document.createElement('div');
+    keyDiv2.style.cssText='display:none;font-size:12px;color:#1E6B3C;font-style:italic;padding:6px 10px;background:#E3F5EB;border-radius:8px;border-left:3px solid #1E6B3C;margin-bottom:.5rem;';
+    sDiv2.appendChild(keyDiv2);
+
+    // Colour-coded chip maker
+    function makeColorChip(text){
+      var posType=tagToken(text);
+      var c=POS_COLORS[posType]||POS_COLORS['other'];
+      var chip=document.createElement('span');
+      chip.textContent=text;
+      chip.style.cssText='display:inline-block;padding:7px 13px;background:'+c.bg+';border:1.5px solid '+c.border+';border-radius:20px;font-size:13px;color:'+c.color+';cursor:pointer;user-select:none;font-family:inherit;transition:opacity .15s,transform .1s;font-weight:600;';
+      chip.addEventListener('mouseenter',function(){if(!chip.dataset.locked)chip.style.opacity='0.75';});
+      chip.addEventListener('mouseleave',function(){if(!chip.dataset.locked)chip.style.opacity='1';});
+      chip.addEventListener('click',function(){
+        if(answered[idx]!==undefined||chip.dataset.locked) return;
+        if(chip.parentElement===bankZone2){
+          ansZone2.appendChild(chip);
+        } else if(chip.parentElement===ansZone2){
+          bankZone2.appendChild(chip);
+        }
+      });
+      return chip;
+    }
+
+    shuffled2.forEach(function(t){ bankZone2.appendChild(makeColorChip(t)); });
+
+    var btnRow2=document.createElement('div');
+    btnRow2.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
+
+    var checkBtn2=document.createElement('button');
+    checkBtn2.textContent='Check ✓';
+    checkBtn2.className='btn btn-p';
+    checkBtn2.style.fontSize='13px';
+    checkBtn2.type='button';
+    checkBtn2.addEventListener('click',function(){
+      if(answered[idx]!==undefined) return;
+      var chips2=[].slice.call(ansZone2.querySelectorAll('span'));
+      if(chips2.length===0){
+        fb2.textContent='Add words to your answer first!';
+        fb2.style.color='var(--red)';
+        return;
+      }
+      var attempt2=chips2.map(function(c){return c.textContent;});
+      var ok2=(attempt2.join(' ')===tokens2.join(' '));
+      answered[idx]=attempt2.join(' ');
+      var allChips2=[].slice.call(bankZone2.querySelectorAll('span')).concat([].slice.call(ansZone2.querySelectorAll('span')));
+      allChips2.forEach(function(c){c.dataset.locked='1';c.style.cursor='default';});
+      if(ok2){
+        correct++;
+        fb2.textContent='✓ Perfect!';
+        fb2.style.color='var(--grn)';
+        ansZone2.style.borderColor='var(--grn)';
+        ansZone2.style.background='var(--grn-l)';
+      } else {
+        wrong++;
+        fb2.textContent='✗ Not quite — check the word order';
+        fb2.style.color='var(--red)';
+        ansZone2.style.borderColor='var(--red)';
+        ansZone2.style.background='var(--red-l)';
+        keyDiv2.textContent='✓ '+ex;
+        keyDiv2.style.display='block';
+      }
+      checkBtn2.disabled=true;
+      resetBtn2.disabled=true;
+      updateLive();
+      if(document.getElementById('s-rv').checked) showExpl(idx,word,ko,pos,ex);
+    });
+
+    var resetBtn2=document.createElement('button');
+    resetBtn2.textContent='Reset ↺';
+    resetBtn2.className='btn btn-s';
+    resetBtn2.style.fontSize='13px';
+    resetBtn2.type='button';
+    resetBtn2.addEventListener('click',function(){
+      if(answered[idx]!==undefined) return;
+      [].slice.call(ansZone2.querySelectorAll('span')).forEach(function(c){bankZone2.appendChild(c);});
+      fb2.textContent=''; fb2.style.color='';
+      keyDiv2.style.display='none'; keyDiv2.textContent='';
+      ansZone2.style.borderColor='#b0b8c4'; ansZone2.style.background='var(--sf)';
+    });
+
+    btnRow2.appendChild(checkBtn2);
+    btnRow2.appendChild(resetBtn2);
+    sDiv2.appendChild(btnRow2);
+    div.appendChild(sDiv2);
+
+  } else if(type==='scramble3'){
+    var s3=document.createElement('div');
+
+    // Word + Korean scaffold
+    var swl3=document.createElement('div');
+    swl3.style.cssText='font-size:13px;font-weight:700;color:var(--acc);margin-bottom:4px;';
+    swl3.textContent=word+' ('+pos+')';
+    s3.appendChild(swl3);
+
+    var swk3=document.createElement('div');
+    swk3.style.cssText='font-size:12px;margin-bottom:.75rem;line-height:1.6;';
+    var koSent3=KO_SENT[ex]||'';
+    swk3.innerHTML='&#127472;&#127479; <span style="color:#1E6B3C;font-weight:600;">'+(koSent3||ko)+'</span>';
+    s3.appendChild(swk3);
+
+    // Instruction
+    var instr3=document.createElement('div');
+    instr3.style.cssText='font-size:11px;color:var(--ink3);margin-bottom:.6rem;';
+    instr3.textContent='Click a chunk to move it. Each colour is a phrase group.';
+    s3.appendChild(instr3);
+
+    // Build chunks
+    var chunks3=chunkSentence(ex);
+    var shuffledChunks=chunks3.slice().sort(function(){return Math.random()-.5;});
+    var safety3=0;
+    while(shuffledChunks.join('|')===chunks3.join('|')&&safety3<15){
+      shuffledChunks=chunks3.slice().sort(function(){return Math.random()-.5;});
+      safety3++;
+    }
+
+    // Bank zone
+    var bankT3=document.createElement('div');
+    bankT3.style.cssText='font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;';
+    bankT3.textContent='Chunk Bank';
+    s3.appendChild(bankT3);
+
+    var bank3=document.createElement('div');
+    bank3.style.cssText='min-height:54px;border:2px dashed #b0b8c4;border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:7px;background:var(--sf);margin-bottom:.9rem;align-content:flex-start;';
+    s3.appendChild(bank3);
+
+    // Answer zone
+    var ansT3=document.createElement('div');
+    ansT3.style.cssText='font-size:11px;font-weight:700;color:var(--acc);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem;';
+    ansT3.textContent='Your Answer';
+    s3.appendChild(ansT3);
+
+    var ans3=document.createElement('div');
+    ans3.style.cssText='min-height:54px;border:2px dashed #b0b8c4;border-radius:10px;padding:8px;display:flex;flex-wrap:wrap;gap:7px;background:var(--sf);margin-bottom:.75rem;align-content:flex-start;';
+    s3.appendChild(ans3);
+
+    var fb3=document.createElement('div');
+    fb3.style.cssText='font-size:13px;font-weight:600;min-height:20px;margin-bottom:.5rem;';
+    s3.appendChild(fb3);
+
+    var key3=document.createElement('div');
+    key3.style.cssText='display:none;font-size:12px;color:#1E6B3C;font-style:italic;padding:6px 10px;background:#E3F5EB;border-radius:8px;border-left:3px solid #1E6B3C;margin-bottom:.5rem;';
+    s3.appendChild(key3);
+
+    // Assign a distinct colour to each chunk (by index in original order)
+    var chunkColorMap={};
+    chunks3.forEach(function(chunk,ci){
+      chunkColorMap[chunk]=CHUNK_PALETTE[ci%CHUNK_PALETTE.length];
+    });
+
+    // Chip maker
+    function makeChunkChip(text){
+      var c=chunkColorMap[text]||CHUNK_PALETTE[0];
+      var chip=document.createElement('span');
+      chip.textContent=text;
+      chip.style.cssText='display:inline-block;padding:8px 14px;background:'+c.bg+';border:2px solid '+c.border+';border-radius:12px;font-size:13px;color:'+c.color+';cursor:pointer;user-select:none;font-family:inherit;transition:opacity .15s;font-weight:600;line-height:1.4;';
+      chip.addEventListener('mouseenter',function(){if(!chip.dataset.locked)chip.style.opacity='0.7';});
+      chip.addEventListener('mouseleave',function(){if(!chip.dataset.locked)chip.style.opacity='1';});
+      chip.addEventListener('click',function(){
+        if(answered[idx]!==undefined||chip.dataset.locked) return;
+        if(chip.parentElement===bank3){
+          ans3.appendChild(chip);
+        } else if(chip.parentElement===ans3){
+          bank3.appendChild(chip);
+        }
+      });
+      return chip;
+    }
+
+    shuffledChunks.forEach(function(t){ bank3.appendChild(makeChunkChip(t)); });
+
+    // Buttons
+    var btnRow3=document.createElement('div');
+    btnRow3.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
+
+    var chkBtn3=document.createElement('button');
+    chkBtn3.textContent='Check ✓';
+    chkBtn3.className='btn btn-p';
+    chkBtn3.style.fontSize='13px';
+    chkBtn3.type='button';
+    chkBtn3.addEventListener('click',function(){
+      if(answered[idx]!==undefined) return;
+      var placed=[].slice.call(ans3.querySelectorAll('span'));
+      if(placed.length===0){
+        fb3.textContent='Move chunks to your answer first!';
+        fb3.style.color='var(--red)';
+        return;
+      }
+      var attempt3=placed.map(function(c){return c.textContent;});
+      // Compare reconstructed sentence
+      var reconstructed=attempt3.join(' ');
+      var ok3=(reconstructed===ex);
+      answered[idx]=reconstructed;
+      // Lock all
+      var all3=[].slice.call(bank3.querySelectorAll('span')).concat([].slice.call(ans3.querySelectorAll('span')));
+      all3.forEach(function(c){c.dataset.locked='1';c.style.cursor='default';});
+      if(ok3){
+        correct++;
+        fb3.textContent='✓ Perfect!';
+        fb3.style.color='var(--grn)';
+        ans3.style.borderColor='var(--grn)';
+        ans3.style.background='var(--grn-l)';
+      } else {
+        wrong++;
+        fb3.textContent='✗ Not quite — check the chunk order';
+        fb3.style.color='var(--red)';
+        ans3.style.borderColor='var(--red)';
+        ans3.style.background='var(--red-l)';
+        key3.textContent='✓ '+ex;
+        key3.style.display='block';
+      }
+      chkBtn3.disabled=true;
+      rstBtn3.disabled=true;
+      updateLive();
+      if(document.getElementById('s-rv').checked) showExpl(idx,word,ko,pos,ex);
+    });
+
+    var rstBtn3=document.createElement('button');
+    rstBtn3.textContent='Reset ↺';
+    rstBtn3.className='btn btn-s';
+    rstBtn3.style.fontSize='13px';
+    rstBtn3.type='button';
+    rstBtn3.addEventListener('click',function(){
+      if(answered[idx]!==undefined) return;
+      [].slice.call(ans3.querySelectorAll('span')).forEach(function(c){bank3.appendChild(c);});
+      fb3.textContent=''; fb3.style.color='';
+      key3.style.display='none'; key3.textContent='';
+      ans3.style.borderColor='#b0b8c4'; ans3.style.background='var(--sf)';
+    });
+
+    btnRow3.appendChild(chkBtn3);
+    btnRow3.appendChild(rstBtn3);
+    s3.appendChild(btnRow3);
+    div.appendChild(s3);
+
+
+  } else {
+    // fill
+    var sentence=makeFill(word,ex);
+    var p3=document.createElement('div');
+    p3.className='qprompt';
+    p3.style.fontSize='13px';
+    p3.style.fontWeight='400';
+    p3.textContent=sentence;
+    div.appendChild(p3);
+    // Korean translation scaffold — always shown
+    var koFill=document.createElement('div');
+    koFill.style.cssText='font-size:12px;color:#1E6B3C;font-weight:600;margin-top:5px;margin-bottom:.75rem;line-height:1.6;';
+    var koSentFill=KO_SENT[ex]||'';
+    if(koSentFill){
+      koFill.innerHTML='&#127472;&#127479; '+koSentFill;
+      div.appendChild(koFill);
+    }
+    var frow=document.createElement('div');
+    frow.className='frow';
+    var inp=document.createElement('input');
+    inp.type='text';
+    inp.className='finp';
+    inp.id='fi_'+idx;
+    inp.placeholder='Type the missing word...';
+    var checkBtn=document.createElement('button');
+    checkBtn.className='btn btn-s';
+    checkBtn.textContent='Check';
+    var checkFn=(function(input, correctWord, cardIdx){
+      return function(){
+        if(answered[cardIdx]!==undefined) return;
+        var val=input.value.trim().toLowerCase();
+        var cw=correctWord.toLowerCase();
+        var stripped=cw.replace(/^(be|get|make|have|do|feel|come|go|take|give|put|set|bring|keep|let|turn|look|run|fall|hold|stand|stay|become|seem|appear)\s+/,'');
+        var ok=(val===cw||val===stripped);
+        answered[cardIdx]=val;
+        if(ok){correct++;input.classList.add('correct');}
+        else{wrong++;input.classList.add('wrong');}
+        input.disabled=true;
+        checkBtn.disabled=true;
+        // show answer
+        var ans=document.createElement('div');
+        ans.style.cssText='font-size:12px;margin-top:5px;';
+        ans.style.color=ok?'var(--grn)':'var(--red)';
+        ans.textContent=(ok?'✓ Correct! ':'✗ Answer: ')+correctWord;
+        frow.appendChild(ans);
+        updateLive();
+        if(document.getElementById('s-rv').checked) showExpl(cardIdx,correctWord,ko,pos,ex);
+      };
+    })(inp, word, idx);
+    inp.addEventListener('keydown',function(e){if(e.key==='Enter') checkFn();});
+    checkBtn.addEventListener('click',checkFn);
+    frow.appendChild(inp);
+    frow.appendChild(checkBtn);
+    div.appendChild(frow);
+  }
+
+  // explanation div — empty until student answers
+  var expl=document.createElement('div');
+  expl.className='expl';
+  expl.id='expl_'+idx;
+  expl.innerHTML='';
+  div.appendChild(expl);
+  return div;
+}
+
+function checkScramble(idx, tokens, ansZone, fb, key){
+  if(answered[idx]!==undefined) return;
+  var chips=[].slice.call(ansZone.querySelectorAll('.word-chip'));
+  if(chips.length!==tokens.length) return; // not all placed yet
+  var attempt=chips.map(function(c){return c.textContent;});
+  var ok=JSON.stringify(attempt)===JSON.stringify(tokens);
+  answered[idx]=attempt.join(' ');
+  if(ok){
+    correct++;
+    fb.textContent='✓ Perfect!'; fb.className='scr-feedback ok';
+    ansZone.classList.add('correct-zone');
+    chips.forEach(function(c){c.classList.add('correct-chip');c.draggable=false;});
+  } else {
+    wrong++;
+    fb.textContent='✗ Not quite — check the word order'; fb.className='scr-feedback ng';
+    ansZone.classList.add('wrong-zone');
+    chips.forEach(function(c){c.classList.add('wrong-chip');c.draggable=false;});
+    key.textContent='✓ '+ex;
+    key.style.display='block';
+  }
+  // swk already shown as scaffold — nothing to reveal
+  updateLive();
+  if(document.getElementById('s-rv').checked){
+    var expl=document.getElementById('expl_'+idx);
+    if(expl) expl.style.display='block';
+  }
+}
+
+function showExpl(idx, word, ko, pos, ex){
+  var el=document.getElementById('expl_'+idx);
+  if(el){
+    el.innerHTML=
+      '<strong>'+word+'</strong> <span style="color:var(--ink3);">'+pos+'</span><br>'+
+      (DEFS[word]?'<span style="color:var(--acc);font-size:11px;">💡 '+DEFS[word]+'</span><br>':'')+
+      '<span style="color:var(--grn);font-size:12px;">🇰🇷 '+ko+'</span><br>'+
+      '<span style="color:var(--ink3);font-size:11px;font-style:italic;">'+ex+'</span>';
+    el.style.display='block';
+  }
+}
+
+// ─── REVEAL ALL ────────────────────────────────
+document.getElementById('s-reveal').addEventListener('click',function(){
+  quizWords.forEach(function(w,i){
+    if(answered[i]!==undefined) return;
+    answered[i]='revealed';
+    var card=document.getElementById('card_'+i);
+    if(!card) return;
+    card.querySelectorAll('.obtn').forEach(function(b){
+      b.disabled=true;
+      var text=b.textContent.slice(3);
+      if(text===w[2]||text===w[0]) b.classList.add('reveal');
+    });
+    var inp=document.getElementById('fi_'+i);
+    if(inp){inp.disabled=true;inp.value=w[0];inp.classList.add('reveal');}
+    // Reveal scramble if applicable
+    // scramble reveal handled by keyDiv inline styles
+    showExpl(i,w[0],w[2],w[1],w[3]);
+  });
+  updateLive();
+});
+
+// ─── RESULTS ───────────────────────────────────
+document.getElementById('s-results').addEventListener('click',showScore);
+function showScore(){
+  var total=quizWords.length, done=correct+wrong;
+  var pct=done>0?Math.round(correct/done*100):0;
+  document.getElementById('s-quiz').style.display='none';
+  document.getElementById('s-score').style.display='block';
+  var emoji=pct>=90?'🏆':pct>=70?'🎉':pct>=50?'👍':'💪';
+  // Task type label
+  var taskLabels={
+    'mc':'📚 Multiple choice 객관식',
+    'fi':'✏️ Fill in the blank',
+    'fi2':'✏️ Fill in the blank + 🇰🇷',
+    'w1':'✍️ Type 1 — Korean → English',
+    'w2':'✍️ Type 2 — Definition → English',
+    'scr':'🔀 Sentence Scramble',
+    'scr2':'🌈 Medium Scramble',
+    'scr3':'🧩 Easy Scramble — Chunks'
+  };
+  var taskEl=document.getElementById('sc-tasktype');
+  if(taskEl) taskEl.textContent=taskLabels[quizMode]||quizMode;
+  document.getElementById('sc-emoji').textContent=emoji;
+  document.getElementById('sc-pct').textContent=pct+'%';
+  var name=document.getElementById('s-name').value;
+  document.getElementById('sc-sub').textContent=(name?name+' — ':'')+correct+' / '+total+' correct';
+  // Date and time
+  var now=new Date();
+  var days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var hh=now.getHours(), mm=now.getMinutes(), ss=now.getSeconds();
+  var ampm=hh>=12?'PM':'AM';
+  hh=hh%12||12;
+  var timeStr=hh+':'+(mm<10?'0':'')+mm+':'+(ss<10?'0':'')+ss+' '+ampm;
+  var dateStr=days[now.getDay()]+', '+months[now.getMonth()]+' '+now.getDate()+', '+now.getFullYear();
+  document.getElementById('sc-datetime').textContent='📅 '+dateStr+'  ·  🕐 '+timeStr;
+  // Encouragement message
+  var msg, bg, color;
+  if(pct===100){
+    msg="🌟 Perfect score! You're absolutely amazing! Keep it up!";
+    bg='#FFF8E1'; color='#E65100';
+  } else if(pct>=90){
+    msg="🏆 Excellent work! You've mastered this vocabulary!";
+    bg='#E8F5E9'; color='#1B5E20';
+  } else if(pct>=80){
+    msg="🎉 Great job! You're almost there — just a little more practice!";
+    bg='#E3F2FD'; color='#0D47A1';
+  } else if(pct>=70){
+    msg="👍 Good effort! Review the words you missed and try again!";
+    bg='#E8EAF6'; color='#1A237E';
+  } else if(pct>=50){
+    msg="💪 Keep going! Every mistake is a chance to learn something new!";
+    bg='#FFF3E0'; color='#E65100';
+  } else if(pct>=30){
+    msg="📖 Don't give up! Read through the word list and try again — you can do it!";
+    bg='#FCE4EC'; color='#880E4F';
+  } else {
+    msg="🌱 Every expert was once a beginner! Study the list and come back stronger!";
+    bg='#F3E5F5'; color='#4A148C';
+  }
+  var el=document.getElementById('sc-encourage');
+  el.textContent=msg;
+  el.style.background=bg;
+  el.style.color=color;
+  el.style.border='1.5px solid '+color;
+  document.getElementById('sc-grid').innerHTML=
+    '<div class="sbox"><div class="v">'+correct+'</div><div class="l">Correct ✓</div></div>'+
+    '<div class="sbox"><div class="v">'+wrong+'</div><div class="l">Wrong ✗</div></div>'+
+    '<div class="sbox"><div class="v">'+(total-done)+'</div><div class="l">Skipped</div></div>'+
+    '<div class="sbox"><div class="v">'+pct+'%</div><div class="l">Score</div></div>';
+  // wrong review
+  var rl=document.getElementById('sc-review');
+  var wrongs=[];
+  quizWords.forEach(function(w,i){
+    var a=answered[i];
+    if(a===undefined||a==='revealed') return;
+    // For write modes: wrong if typed answer !== correct word (exact)
+    // For MC: wrong if chosen option !== correct answer
+    // For fill: wrong if typed !== word
+    var correctWord=w[0];
+    var correctKo=w[2];
+    var isWrong=false;
+    if(a!==correctWord && a!==correctWord.toLowerCase() && a!==correctKo && a.toLowerCase()!==correctWord.toLowerCase()){
+      isWrong=true;
+    }
+    if(isWrong) wrongs.push(w);
+  });
+  if(!wrongs.length){rl.innerHTML='<p style="font-size:13px;color:var(--grn);">No wrong answers — great work! 🎉</p>';return;}
+  rl.innerHTML=wrongs.map(function(w){
+    var engdef=DEFS[w[0]]?'<span style="color:var(--acc);font-size:11px;font-style:italic;">💡 '+DEFS[w[0]]+'</span><br>':'';
+    return '<div class="ritem"><div class="rword">'+w[0]+' <span style="font-size:11px;color:var(--ink3);">'+w[1]+'</span></div>'+
+      '<div class="rans">'+engdef+'<span style="color:var(--grn);">✓ '+w[2]+'</span><br>'+
+      '<span style="color:var(--ink3);font-size:11px;font-style:italic;">'+w[3]+'</span></div></div>';
+  }).join('');
+}
+
+document.getElementById('sc-retry').addEventListener('click',function(){
+  document.getElementById('s-score').style.display='none';
+  answered={}; correct=0; wrong=0;
+  if(document.getElementById('s-sh').checked) quizWords=shuffle(quizWords);
+  document.getElementById('s-quiz').style.display='block';
+  updateLive();
+  renderQuiz();
+});
+document.getElementById('sc-new').addEventListener('click',function(){
+  document.getElementById('s-score').style.display='none';
+  document.getElementById('s-setup').style.display='block';
+});
+
+</script>
+</body>
+</html>
