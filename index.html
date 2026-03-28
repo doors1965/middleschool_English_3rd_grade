@@ -140,6 +140,18 @@ input[type=text]:focus{border-color:var(--acc);}
 .stars{font-size:11px;margin-left:5px;vertical-align:middle;letter-spacing:1px;}
 
 
+
+/* ── PRINT STYLES ── */
+@media print {
+  .nav, #s-setup, #s-quiz, .brow, #sc-retry, #sc-new, #sc-print,
+  .nav-tab, #tab-btn-teacher, #tab-btn-student { display:none !important; }
+  body { background:#fff !important; padding:0 !important; }
+  #s-score { display:block !important; }
+  .card { box-shadow:none !important; border:1px solid #ccc !important; }
+  .ritem { break-inside:avoid; }
+  #sc-review { page-break-before:auto; }
+}
+
 </style>
 </head>
 <body>
@@ -242,13 +254,14 @@ input[type=text]:focus{border-color:var(--acc);}
 
     </div>
     <div class="card">
-      <div class="ct">Options</div>
+      <div class="ct">Options : <span style="font-size:11px;color:var(--acc);font-weight:700;text-transform:none;letter-spacing:0;">영남중3</span></div>
       <div class="opt-row">
         <label class="ck"><input type="checkbox" id="s-sh" checked><span>Shuffle questions</span></label>
         <label class="ck"><input type="checkbox" id="s-rv"><span>Show explanation after each answer</span></label>
       </div>
       <div style="margin-top:.6rem;font-size:13px;color:var(--ink2);">
-        Name: <input type="text" id="s-name" placeholder="이름 (선택사항)" style="width:150px;margin-left:6px;">
+        Name: <input type="text" id="s-name" placeholder="이름을 입력하세요 *" style="width:180px;margin-left:6px;border:1.5px solid var(--bds);" required>
+        <span style="font-size:11px;color:var(--red);margin-left:4px;">* 필수</span>
       </div>
     </div>
     <button class="btn btn-g" id="s-start" style="width:100%;padding:13px;font-size:15px;">Start Quiz →</button>
@@ -285,6 +298,7 @@ input[type=text]:focus{border-color:var(--acc);}
     <div class="brow">
       <button class="btn btn-p" id="sc-retry">Try again ↺</button>
       <button class="btn btn-s" id="sc-new">New quiz</button>
+      <button class="btn btn-s" id="sc-print" onclick="printResult()" style="background:#1E6B3C;color:#fff;border-color:#1E6B3C;">🖨 Save / Print</button>
     </div>
     <div style="margin-top:1.25rem;">
       <div class="ct" style="margin-bottom:.65rem;">Wrong answers — review</div>
@@ -448,7 +462,6 @@ document.getElementById('tab-btn-student').addEventListener('click',function(){
   this.classList.add('active');
   document.getElementById('panel-student').classList.add('active');
 });
-
 // ─── BUILD Q GRIDS ──────────────────────────────
 function buildGrid(containerId, selSet, ctrId){
   var g=document.getElementById(containerId);
@@ -466,6 +479,11 @@ function buildGrid(containerId, selSet, ctrId){
   });
 }
 buildGrid('tq-grid', tSel, 'tq-ctr');
+
+// Clear name field error on input
+document.getElementById('s-name').addEventListener('input', function(){
+  this.style.borderColor='var(--bds)';
+});
 buildGrid('sq-grid', sSel, 'sq-ctr');
 
 function updateCtr(sel, ctrId){
@@ -668,6 +686,15 @@ toggleCat('vocab');
 
 // ─── STUDENT: START ────────────────────────────
 document.getElementById('s-start').addEventListener('click',function(){
+  var nameVal=document.getElementById('s-name').value.trim();
+  if(!nameVal){
+    var inp=document.getElementById('s-name');
+    inp.style.borderColor='var(--red)';
+    inp.focus();
+    showStatus('s-status','이름을 입력해 주세요! Please enter your name first.','er');
+    return;
+  }
+  document.getElementById('s-name').style.borderColor='var(--bds)';
   var words=WL.filter(function(w){return sSel.has(w[4]);});
   if(words.length<4){showStatus('s-status','Please select at least 4 words (needed for multiple choice).','er');return;}
   if(document.getElementById('s-sh').checked) words=shuffle(words);
@@ -1539,6 +1566,22 @@ document.getElementById('sc-new').addEventListener('click',function(){
   document.getElementById('s-setup').style.display='block';
 });
 
+
+function printResult(){
+  // Temporarily show the score screen for printing
+  var style = document.createElement('style');
+  style.id = 'print-temp';
+  style.textContent = '@media print { #s-score { display:block !important; } }';
+  document.head.appendChild(style);
+  window.print();
+  // Clean up after print dialog closes
+  setTimeout(function(){
+    var el = document.getElementById('print-temp');
+    if(el) el.parentNode.removeChild(el);
+  }, 1000);
+}
+
 </script>
 </body>
 </html>
+
